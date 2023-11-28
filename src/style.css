@@ -125,67 +125,6 @@ main.loading {
   opacity: 0;
 }
 
-.grid {
-  display: flex;
-  flex-direction: column;
-  font-size: 0;
-  border: 12px solid #333333;
-  border-top: none;
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-.grid .row {
-  flex: none;
-  display: flex;
-}
-
-.grid .fill {
-  background-color: rgba(0, 0, 0, 0.25);
-}
-
-main .grid .row .cell {
-  background-color: transparent;
-  display: block;
-  width: 20px;
-  height: 16px;
-  border-radius: 3px;
-  contain: strict;
-}
-
-main .grid .row .cell.shape {
-  border: 2px solid #333333;
-  box-shadow: inset -4px -4px rgba(0, 0, 0, 0.25);
-}
-
-main .grid .row .cell.I {
-  background-color: cyan;
-}
-
-main .grid .row .cell.J {
-  background-color: blue;
-}
-
-main .grid .row .cell.L {
-  background-color: orange;
-}
-
-main .grid .row .cell.O {
-  background-color: yellow;
-}
-
-main .grid .row .cell.T {
-  background-color: lightgreen;
-}
-
-main .grid .row .cell.S {
-  background-color: magenta;
-}
-
-main .grid .row .cell.Z {
-  background-color: red;
-}
-
 footer {
   width: 100%;
   display: flex;
@@ -208,14 +147,6 @@ footer {
   font-family: "Courier New", Courier, monospace;
   box-shadow: inset -4px -4px rgba(0, 0, 0, 0.25);
   cursor: pointer;
-}
-
-.restart-button:hover {
-  box-shadow: inset 4px 4px rgba(0, 0, 0, 0.1);
-}
-
-.restart-button:active {
-  box-shadow: inset 4px 4px rgba(0, 0, 0, 0.2);
 }
 
 .text-black {

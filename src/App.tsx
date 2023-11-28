@@ -1,5 +1,5 @@
 import React, { FC, useState, useRef, useEffect } from "react";
-import { Tetris } from "./Tetris";
+import { DoubleJump } from "./DoubleJump";
 import {
   addPayerToLeaderboard,
   getLeaderboard,
@@ -18,13 +18,13 @@ const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 let isInstance = false;
 
 export const App: FC = () => {
-  const tetrisRef = useRef<Tetris>();
+  const tetrisRef = useRef<DoubleJump>();
   const isOverlayRef = useRef(false);
 
   const defaultName = useRef(localStorage.getItem("playerName"));
 
   const [loading, setLoading] = useState(true);
-  const [gameArea, setGameArea] = useState<string[][]>([]);
+  const [gameArea, setGameArea] = useState<any>();
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
@@ -32,13 +32,13 @@ export const App: FC = () => {
 
   isOverlayRef.current = isShownLeaderboard || isShownInstructions;
 
-  const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
+  const sortedLeaders = leaders.sort((a, b) => b.spots - a.spots).slice(0, 10);
 
   const restart = () => {
     if (!isInstance) {
       isInstance = true;
       tetrisRef.current = undefined;
-      tetrisRef.current = new Tetris({ renderer: setGameArea });
+      tetrisRef.current = new DoubleJump({ renderer: setGameArea });
       tetrisRef.current.start();
     }
   };
@@ -58,15 +58,15 @@ export const App: FC = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (tetrisRef.current?.erasedLines) {
-        trackTetrisGameFinish(tetrisRef.current?.erasedLines || 0);
+      if (tetrisRef.current?.spots) {
+        trackTetrisGameFinish(tetrisRef.current?.spots || 0);
 
         const promptPlayer = () => {
           let playerName;
 
           while (true) {
             const player = prompt(
-              `Lines: 🕹️${tetrisRef.current?.erasedLines}\n👤Enter your name: `,
+              `Spots: 🚀${tetrisRef.current?.spots}\n👤Enter your name: `,
               defaultName.current ?? undefined
             );
 
@@ -83,7 +83,7 @@ export const App: FC = () => {
         if (playerName) {
           const playerId = await addPayerToLeaderboard(
             playerName,
-            tetrisRef.current?.erasedLines || 0
+            tetrisRef.current?.spots || 0
           );
 
           localStorage.setItem("playerName", playerName);
@@ -91,10 +91,7 @@ export const App: FC = () => {
 
           if (playerId) setOwnId(playerId);
 
-          trackTetrisSignGameFinish(
-            tetrisRef.current?.erasedLines || 0,
-            playerName
-          );
+          trackTetrisSignGameFinish(tetrisRef.current?.spots || 0, playerName);
 
           await getLeaderboard().then(setLeaders);
         }
@@ -152,14 +149,6 @@ export const App: FC = () => {
     };
   }, []);
 
-  const isFull =
-    (tetrisRef.current?.erasedLines || 0) >=
-    (tetrisRef.current?.config.height || 0);
-  const isFill = (i: number) =>
-    i + 1 > gameArea.length - (tetrisRef.current?.erasedLines || 0);
-
-  const emoji = [isFull && "😎"].find(Boolean);
-
   const getPrize = (i: number) => {
     if (i === 0) {
       return "🥇";
@@ -170,7 +159,7 @@ export const App: FC = () => {
     } else {
       return "";
     }
-  }
+  };
 
   return (
     <>
@@ -190,13 +179,13 @@ export const App: FC = () => {
             <div className="instruction__images">
               <div className="instruction__image">
                 <span className="instruction__image-title">
-                  Swipe{"\n"}to{"\n"}control
+                  Swipe{"\n"}to{"\n"}move
                 </span>
                 <img src={swipeImg} alt="swipe" />
               </div>
               <div className="instruction__image">
                 <span className="instruction__image-title">
-                  Tap{"\n"}to{"\n"}rotate
+                  Tap{"\n"}to{"\n"}pause
                 </span>
                 <img src={tapImg} alt="tap" />
               </div>
@@ -207,26 +196,11 @@ export const App: FC = () => {
         )}
 
         <header>
-          <h1>Tetris Game</h1>
-          <h3>
-            Lines: 🕹{tetrisRef.current?.erasedLines || 0} {emoji}
-          </h3>
+          <h1>Double Jump Game</h1>
+          <h3>Spots: 🚀{tetrisRef.current?.spots || 0}</h3>
         </header>
 
-        {tetrisRef.current && (
-          <section className="grid">
-            {gameArea.map((row, i) => (
-              <div key={i} className={`row ${isFill(i) ? "fill" : ""}`}>
-                {row.map((cell, ii) => (
-                  <div
-                    key={ii}
-                    className={`cell ${cell} ${cell ? "shape" : ""}`}
-                  />
-                ))}
-              </div>
-            ))}
-          </section>
-        )}
+        <section className="grid">Double Jump</section>
 
         {isShownLeaderboard && (
           <div role="button" className="leaderboard" onClick={handleRestart}>
@@ -237,22 +211,24 @@ export const App: FC = () => {
                   <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>Lines</th>
+                    <th>Spots</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedLeaders.map((leader, i) => (
                     <tr
                       key={leader.id}
-                      className={leader.id === ownId ? 'strong' : ''}
+                      className={leader.id === ownId ? "strong" : ""}
                     >
                       <td>
-                        <span>{leader.id === ownId ? '→ ' : ''}</span>
+                        <span>{leader.id === ownId ? "→ " : ""}</span>
                         <span>{i + 1}</span>
-                        <span>{getPrize(i) || <span className="invisible">🥉</span>}</span>
+                        <span>
+                          {getPrize(i) || <span className="invisible">🥉</span>}
+                        </span>
                       </td>
-                      <td>{leader.player.slice(0, 20).padEnd(20, '.')}</td>
-                      <td>🕹{leader.lines}</td>
+                      <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
+                      <td>🚀{leader.spots}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -262,11 +238,6 @@ export const App: FC = () => {
         )}
 
         <footer>
-          {/*{tetrisRef.current?.isEndGame && (*/}
-          {/*  <button type="button" className="restart-button" onClick={restart}>*/}
-          {/*    Restart*/}
-          {/*  </button>*/}
-          {/*)*/}
           <strong className="help">
             <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
             <div>

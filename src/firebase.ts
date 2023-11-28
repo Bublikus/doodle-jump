@@ -12,12 +12,12 @@ import {
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: "little-tetris-game.firebaseapp.com",
-  projectId: "little-tetris-game",
-  storageBucket: "little-tetris-game.appspot.com",
-  messagingSenderId: "304613125071",
-  appId: "1:304613125071:web:010765bfa182f5d1ffc0ba",
-  measurementId: "G-DQTZSFH3Q5",
+  authDomain: "double-jump-game.firebaseapp.com",
+  projectId: "double-jump-game",
+  storageBucket: "double-jump-game.appspot.com",
+  messagingSenderId: "580939476105",
+  appId: "1:580939476105:web:f4053a8ebfca132c55aa58",
+  measurementId: "G-BM2XXQDY35"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,14 +30,14 @@ export const analytics = getAnalytics(app);
 export type Leader = {
   id: string;
   player: string;
-  lines: number;
+  spots: number;
   date: string;
 };
 
 export async function getLeaderboard(): Promise<Leader[]> {
   try {
     const colRef = collection(db, "leaderboard");
-    const q = query(colRef, orderBy("lines", "desc"), limit(10));
+    const q = query(colRef, orderBy("spots", "desc"), limit(10));
     const docsRef = await getDocs(q);
 
     return (
@@ -49,12 +49,12 @@ export async function getLeaderboard(): Promise<Leader[]> {
   }
 }
 
-export async function addPayerToLeaderboard(player: string, lines: number) {
+export async function addPayerToLeaderboard(player: string, spots: number) {
   try {
-    if (!player || !lines) throw new Error("Invalid request body");
+    if (!player || !spots) throw new Error("Invalid request body");
     const docRef = await addDoc(collection(db, "leaderboard"), {
       player,
-      lines,
+      spots,
       date: new Date().toISOString(),
     });
     return docRef.id;
@@ -65,19 +65,19 @@ export async function addPayerToLeaderboard(player: string, lines: number) {
 
 // Analytics
 
-export function trackTetrisGameFinish(lines: number) {
-  logEvent(analytics, "tetris_game_finish", {
-    lines,
+export function trackTetrisGameFinish(spots: number) {
+  logEvent(analytics, "double_jump_game_finish", {
+    spots,
   });
 }
 
-export function trackTetrisSignGameFinish(lines: number, player: string) {
-  logEvent(analytics, "tetris_sign_game_finish", {
-    lines,
+export function trackTetrisSignGameFinish(spots: number, player: string) {
+  logEvent(analytics, "double_jump_sign_game_finish", {
+    spots,
     player,
   });
 }
 
 export function trackTetrisGameRestart() {
-  logEvent(analytics, "tetris_game_restart");
+  logEvent(analytics, "double_jump_game_restart");
 }
