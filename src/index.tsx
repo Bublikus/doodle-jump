@@ -1,19 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React, { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "react-error-boundary";
+import { App } from "./App";
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+function fallbackRender({ error }: { error: Error }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre style={{ color: "red" }}>{error.message}</pre>
+    </div>
+  );
+}
+
+// @ts-ignore
+const root = createRoot(document.getElementById("root"));
+
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <StrictMode>
+    <ErrorBoundary fallbackRender={fallbackRender}>
+      <App />
+    </ErrorBoundary>
+  </StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
