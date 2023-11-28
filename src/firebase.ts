@@ -12,12 +12,12 @@ import {
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: "double-jump-game.firebaseapp.com",
-  projectId: "double-jump-game",
-  storageBucket: "double-jump-game.appspot.com",
-  messagingSenderId: "580939476105",
-  appId: "1:580939476105:web:f4053a8ebfca132c55aa58",
-  measurementId: "G-BM2XXQDY35"
+  authDomain: "little-doodle-jump-game.firebaseapp.com",
+  projectId: "little-doodle-jump-game",
+  storageBucket: "little-doodle-jump-game.appspot.com",
+  messagingSenderId: "817358213091",
+  appId: "1:817358213091:web:716f6e03f96b3a756b9ad6",
+  measurementId: "G-DLSPDLT6ZH"
 };
 
 const app = initializeApp(firebaseConfig);

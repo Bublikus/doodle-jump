@@ -19,4 +19,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DOUBLE_JUMP_GAME }}'
           channelId: live
-          projectId: double-jump-game
+          projectId: doodle-jump-game
