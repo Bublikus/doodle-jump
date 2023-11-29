@@ -1,5 +1,5 @@
 import React, { FC, useState, useRef, useEffect } from "react";
-import { DoubleJump } from "./DoubleJump";
+import { DoodleJump } from "./DoodleJump";
 import {
   addPayerToLeaderboard,
   getLeaderboard,
@@ -12,13 +12,16 @@ import bgImg from "./bg.jpg";
 import swipeImg from "./swipe-all-directions.png";
 import tapImg from "./tap.png";
 import "./style.css";
+import {DoodleRenderer} from './DoodleRenderer';
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
 let isInstance = false;
 
 export const App: FC = () => {
-  const tetrisRef = useRef<DoubleJump>();
+  const doodleJumpRef = useRef<DoodleJump>();
+  const doodleJumpRendererRef = useRef<DoodleRenderer>();
+  const gameContainerRef = useRef<HTMLElement>(null);
   const isOverlayRef = useRef(false);
 
   const defaultName = useRef(localStorage.getItem("playerName"));
@@ -35,11 +38,12 @@ export const App: FC = () => {
   const sortedLeaders = leaders.sort((a, b) => b.spots - a.spots).slice(0, 10);
 
   const restart = () => {
-    if (!isInstance) {
+    if (!isInstance && gameContainerRef.current) {
       isInstance = true;
-      tetrisRef.current = undefined;
-      tetrisRef.current = new DoubleJump({ renderer: setGameArea });
-      tetrisRef.current.start();
+      doodleJumpRef.current = undefined;
+      doodleJumpRendererRef.current = new DoodleRenderer(gameContainerRef.current);
+      doodleJumpRef.current = new DoodleJump({ renderer: (data) => doodleJumpRendererRef.current?.update(data) });
+      doodleJumpRef.current.start();
     }
   };
 
@@ -49,7 +53,7 @@ export const App: FC = () => {
     trackTetrisGameRestart();
     restart();
     setIsShownInstructions(false);
-    tetrisRef.current?.play();
+    doodleJumpRef.current?.play();
   };
 
   useEffect(() => {
@@ -58,15 +62,15 @@ export const App: FC = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (tetrisRef.current?.spots) {
-        trackTetrisGameFinish(tetrisRef.current?.spots || 0);
+      if (doodleJumpRef.current?.score) {
+        trackTetrisGameFinish(doodleJumpRef.current?.score || 0);
 
         const promptPlayer = () => {
           let playerName;
 
           while (true) {
             const player = prompt(
-              `Spots: 🚀${tetrisRef.current?.spots}\n👤Enter your name: `,
+              `Spots: 🚀${doodleJumpRef.current?.score}\n👤Enter your name: `,
               defaultName.current ?? undefined
             );
 
@@ -83,7 +87,7 @@ export const App: FC = () => {
         if (playerName) {
           const playerId = await addPayerToLeaderboard(
             playerName,
-            tetrisRef.current?.spots || 0
+            doodleJumpRef.current?.score || 0
           );
 
           localStorage.setItem("playerName", playerName);
@@ -91,18 +95,21 @@ export const App: FC = () => {
 
           if (playerId) setOwnId(playerId);
 
-          trackTetrisSignGameFinish(tetrisRef.current?.spots || 0, playerName);
+          trackTetrisSignGameFinish(
+            doodleJumpRef.current?.score || 0,
+            playerName
+          );
 
           await getLeaderboard().then(setLeaders);
         }
       }
 
       isInstance = false;
-      tetrisRef.current?.destroy();
+      doodleJumpRef.current?.destroy();
     };
 
-    if (tetrisRef.current?.isEndGame) endGame();
-  }, [tetrisRef.current?.isEndGame]);
+    // if (doodleJumpRef.current?.isGameOver) endGame();
+  }, [doodleJumpRef.current?.isGameOver]);
 
   useEffect(() => {
     if (!loading && !isShownInstructions) restart();
@@ -113,7 +120,7 @@ export const App: FC = () => {
 
     if (isShownInstructions) {
       restart();
-      tetrisRef.current?.pause();
+      doodleJumpRef.current?.pause();
     }
   }, []);
 
@@ -125,9 +132,9 @@ export const App: FC = () => {
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
-        tetrisRef.current?.pause();
+        doodleJumpRef.current?.pause();
       } else if (!isOverlayRef.current) {
-        tetrisRef.current?.play();
+        doodleJumpRef.current?.play();
       }
     });
 
@@ -197,10 +204,10 @@ export const App: FC = () => {
 
         <header>
           <h1>Double Jump Game</h1>
-          <h3>Spots: 🚀{tetrisRef.current?.spots || 0}</h3>
+          <h3>Spots: 🚀{doodleJumpRef.current?.score || 0}</h3>
         </header>
 
-        <section className="grid">Double Jump</section>
+        <section ref={gameContainerRef} className="game-container"/>
 
         {isShownLeaderboard && (
           <div role="button" className="leaderboard" onClick={handleRestart}>
