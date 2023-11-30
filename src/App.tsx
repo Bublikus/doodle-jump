@@ -8,11 +8,11 @@ import {
   trackTetrisGameRestart,
   trackTetrisSignGameFinish,
 } from "./firebase";
+import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
 import bgImg from "./bg.jpg";
 import swipeImg from "./swipe-all-directions.png";
 import tapImg from "./tap.png";
 import "./style.css";
-import {DoodleRenderer} from './DoodleRenderer';
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
@@ -20,8 +20,8 @@ let isInstance = false;
 
 export const App: FC = () => {
   const doodleJumpRef = useRef<DoodleJump>();
-  const doodleJumpRendererRef = useRef<DoodleRenderer>();
-  const gameContainerRef = useRef<HTMLElement>(null);
+  const doodleJumpRendererRef = useRef<CanvasDoodleRenderer>();
+  const gameContainerRef = useRef<HTMLCanvasElement>(null);
   const isOverlayRef = useRef(false);
 
   const defaultName = useRef(localStorage.getItem("playerName"));
@@ -41,8 +41,12 @@ export const App: FC = () => {
     if (!isInstance && gameContainerRef.current) {
       isInstance = true;
       doodleJumpRef.current = undefined;
-      doodleJumpRendererRef.current = new DoodleRenderer(gameContainerRef.current);
-      doodleJumpRef.current = new DoodleJump({ renderer: (data) => doodleJumpRendererRef.current?.update(data) });
+      doodleJumpRendererRef.current = new CanvasDoodleRenderer(
+        gameContainerRef.current
+      );
+      doodleJumpRef.current = new DoodleJump({
+        renderer: (data) => doodleJumpRendererRef.current?.update(data),
+      });
       doodleJumpRef.current.start();
     }
   };
@@ -207,7 +211,7 @@ export const App: FC = () => {
           <h3>Spots: 🚀{doodleJumpRef.current?.score || 0}</h3>
         </header>
 
-        <section ref={gameContainerRef} className="game-container"/>
+        <canvas ref={gameContainerRef} className="game-container" />
 
         {isShownLeaderboard && (
           <div role="button" className="leaderboard" onClick={handleRestart}>

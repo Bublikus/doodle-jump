@@ -11,7 +11,12 @@ type Config = {
 };
 
 type Coords = { x: number; y: number };
-type Platform = { position: Coords; type: "normal" | "moving" | "vanishing" };
+type Size = { width: number; height: number };
+type Platform = {
+  size: Size;
+  position: Coords;
+  type: "normal" | "moving" | "vanishing";
+};
 type Renderer = (data: {
   player: Coords;
   platforms: Platform[];
@@ -20,11 +25,11 @@ type Renderer = (data: {
 
 export class DoodleJump {
   private playerPosition: Coords;
-  private playerHeight: number = 50;
-  private playerWidth: number = 50;
+  private playerHeight: number = 0.1;
+  private playerWidth: number = 0.1;
   private platforms: Platform[];
-  private platformHeight: number = 20;
-  private platformWidth: number = 50;
+  private platformHeight: number = 0.04;
+  private platformWidth: number = 0.14;
   private animationFrameRequest: number = 0;
   private velocity: number;
   private renderer: Renderer;
@@ -38,18 +43,15 @@ export class DoodleJump {
 
   constructor(config: Config) {
     this.config = {
-      width: 500,
-      height: 500,
-      gravity: 0.3,
-      jumpHeight: 10,
-      platformSpeed: 1,
+      width: 1,
+      height: 1,
+      gravity: 0.001,
+      jumpHeight: 0.03,
+      platformSpeed: 0.001,
       scorePerPlatform: 1,
       ...config,
     };
-    this.playerPosition = {
-      x: this.config.width / 2,
-      y: this.config.height / 2,
-    };
+    this.playerPosition = { x: 0.5, y: 0.5 };
     this.platforms = [];
     this.score = 0;
     this.velocity = 0;
@@ -92,7 +94,7 @@ export class DoodleJump {
 
   private bindKeys() {
     this.inputHandler?.destroy();
-    this.inputHandler = new InputHandler({ swipeTickThresholdPX: 40 });
+    this.inputHandler = new InputHandler({ swipeTickThresholdPX: 20 });
     this.inputHandler.handleActions({
       ArrowLeft: () => this.movePlayerLeft(),
       ArrowRight: () => this.movePlayerRight(),
@@ -102,21 +104,28 @@ export class DoodleJump {
   }
 
   private movePlayerLeft() {
-    this.keys["ArrowRight"] = false;
-    this.keys["ArrowLeft"] = true;
+    const moveAmount = 0.05;
+    this.playerPosition.x = Math.max(0, this.playerPosition.x - moveAmount);
   }
 
   private movePlayerRight() {
-    this.keys["ArrowLeft"] = false;
-    this.keys["ArrowRight"] = true;
+    const moveAmount = 0.05;
+    this.playerPosition.x = Math.min(
+      this.config.width,
+      this.playerPosition.x + moveAmount
+    );
   }
 
   private generateInitialPlatforms() {
     for (let i = 0; i < 10; i++) {
       this.platforms.push({
+        size: {
+          width: this.platformWidth,
+          height: this.platformHeight,
+        },
         position: {
           x: Math.random() * this.config.width,
-          y: (this.config.height / 10) * i,
+          y: i / 10,
         },
         type: "normal",
       });
@@ -178,6 +187,7 @@ export class DoodleJump {
         this.platforms[this.platforms.length - 1].position.y -
         this.config.height / 10;
       this.platforms.push({
+        size: { width: this.platformWidth, height: this.platformHeight },
         position: { x: Math.random() * this.config.width, y: yPos },
         type: "normal",
       });
@@ -187,7 +197,7 @@ export class DoodleJump {
   private checkCollisions() {
     this.platforms.forEach((platform) => {
       if (
-        this.playerPosition.x >= platform.position.x &&
+        this.playerPosition.x + this.playerWidth >= platform.position.x &&
         this.playerPosition.x <= platform.position.x + this.platformWidth &&
         this.playerPosition.y + this.playerHeight >= platform.position.y &&
         this.playerPosition.y + this.playerHeight <=
@@ -202,9 +212,14 @@ export class DoodleJump {
   }
 
   private render() {
+    // Adjust the render call to account for normalized coordinates
     this.renderer({
       player: this.playerPosition,
-      platforms: this.platforms,
+      platforms: this.platforms.map((platform) => ({
+        size: platform.size,
+        position: platform.position,
+        type: platform.type,
+      })),
       score: this.score,
     });
   }
