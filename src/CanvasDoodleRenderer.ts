@@ -14,6 +14,8 @@ export class CanvasDoodleRenderer {
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+    this.canvas.width = canvas.clientWidth;
+    this.canvas.height = canvas.clientHeight;
     this.ctx = canvas.getContext('2d')!;
     this.playerNormalizedSize = { width: 0.1, height: 0.1 };
     this.platformNormalizedSize = { width: 0.14, height: 0.04 };
