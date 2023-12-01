@@ -31,6 +31,7 @@ export class DoodleJump {
   private platformHeight: number = 0.04;
   private platformWidth: number = 0.14;
   private animationFrameRequest: number = 0;
+  private platformsPerScreen: number = 10;
   private velocity: number;
   private renderer: Renderer;
   private keys: { [key: string]: boolean };
@@ -117,15 +118,15 @@ export class DoodleJump {
   }
 
   private generateInitialPlatforms() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < this.platformsPerScreen; i++) {
       this.platforms.push({
         size: {
           width: this.platformWidth,
           height: this.platformHeight,
         },
         position: {
-          x: Math.random() * this.config.width,
-          y: i / 10,
+          x: Math.random() * (this.config.width - this.platformWidth),
+          y: i / this.platformsPerScreen,
         },
         type: "normal",
       });
@@ -181,14 +182,19 @@ export class DoodleJump {
       (platform) => platform.position.y < this.config.height
     );
 
+    // Update score
+    const filteredPlatformsAmount =
+      this.platformsPerScreen - this.platforms.length;
+    this.score += filteredPlatformsAmount;
+
     // Add new platforms
-    while (this.platforms.length < 10) {
-      let yPos =
-        this.platforms[this.platforms.length - 1].position.y -
-        this.config.height / 10;
+    while (this.platforms.length < this.platformsPerScreen) {
+      const x = Math.random() * (this.config.width - this.playerWidth);
+      const y = -this.platformHeight;
+
       this.platforms.push({
         size: { width: this.platformWidth, height: this.platformHeight },
-        position: { x: Math.random() * this.config.width, y: yPos },
+        position: { x, y },
         type: "normal",
       });
     }
@@ -206,7 +212,6 @@ export class DoodleJump {
       ) {
         // Collision detected, make the player jump
         this.velocity = -this.config.jumpHeight;
-        this.score += this.config.scorePerPlatform;
       }
     });
   }

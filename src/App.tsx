@@ -27,7 +27,7 @@ export const App: FC = () => {
   const defaultName = useRef(localStorage.getItem("playerName"));
 
   const [loading, setLoading] = useState(true);
-  const [gameArea, setGameArea] = useState<any>();
+  const [score, setScore] = useState(0);
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
@@ -45,7 +45,10 @@ export const App: FC = () => {
         gameContainerRef.current
       );
       doodleJumpRef.current = new DoodleJump({
-        renderer: (data) => doodleJumpRendererRef.current?.update(data),
+        renderer: (data) => {
+          doodleJumpRendererRef.current?.update(data);
+          setScore(data.score);
+        },
       });
       doodleJumpRef.current.start();
     }
@@ -208,7 +211,7 @@ export const App: FC = () => {
 
         <header>
           <h1>Double Jump Game</h1>
-          <h3>Spots: 🚀{doodleJumpRef.current?.score || 0}</h3>
+          <h3>Spots: 🚀{score}</h3>
         </header>
 
         <canvas ref={gameContainerRef} className="game-container" />
