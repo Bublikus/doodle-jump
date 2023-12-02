@@ -46,9 +46,9 @@ export class DoodleJump {
 
   constructor(config: Config) {
     this.config = {
-      gravity: 0.001,
-      jumpHeight: 0.03,
-      platformSpeed: 0.001,
+      gravity: 0.0001,
+      jumpHeight: 0.008,
+      platformSpeed: 0.0001,
       scorePerPlatform: 1,
       ...config,
     };
@@ -136,7 +136,9 @@ export class DoodleJump {
 
     if (Object.values(this.keys).some(Boolean)) {
       this.updatePlayer();
-      this.updatePlatforms();
+      if (this.player.position.y < this.game.height / 2 && this.velocity < 0) {
+        this.updatePlatforms();
+      }
       this.checkCollisions();
     }
     this.render();
@@ -178,24 +180,19 @@ export class DoodleJump {
   }
 
   private updatePlatforms() {
-    // Move platforms downward
+    const movement = -this.velocity;
     this.platforms.forEach((platform) => {
-      platform.position.y += this.config.platformSpeed;
+      platform.position.y += movement;
     });
 
-    // Remove platforms that have moved off screen
+    // Check if platforms have moved off the bottom of the screen
     this.platforms = this.platforms.filter(
       (platform) => platform.position.y < this.game.height
     );
 
-    // Update score
-    const filteredPlatformsAmount =
-      this.platformsPerScreen - this.platforms.length;
-    this.score += filteredPlatformsAmount;
-
-    // Add new platforms
+    // Add new platforms at the top as needed
     while (this.platforms.length < this.platformsPerScreen) {
-      const x = Math.random() * (this.game.width - this.player.size.width);
+      const x = Math.random() * (this.game.width - this.platformWidth);
       const y = -this.platformHeight;
 
       this.platforms.push({
