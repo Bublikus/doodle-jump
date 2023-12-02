@@ -1,9 +1,8 @@
 import { InputHandler } from "./InputHandler";
+import { RenderData } from "./types";
 
 type Config = {
   renderer: Renderer;
-  width?: number;
-  height?: number;
   gravity?: number;
   jumpHeight?: number;
   platformSpeed?: number;
@@ -12,63 +11,53 @@ type Config = {
 
 type Coords = { x: number; y: number };
 type Size = { width: number; height: number };
+type Player = {
+  position: Coords;
+  size: Size;
+};
 type Platform = {
   size: Size;
   position: Coords;
   type: "normal" | "moving" | "vanishing";
 };
-type Renderer = (data: {
-  player: Coords;
-  platforms: Platform[];
-  score: number;
-}) => void;
+type Renderer = (data: RenderData) => void;
 
 export class DoodleJump {
-  private playerPosition: Coords;
-  private playerHeight: number = 0.1;
-  private playerWidth: number = 0.1;
-  private platforms: Platform[];
+  private game = { width: 1, height: 1 };
+  private player: Player = {
+    position: { x: 0, y: 0 },
+    size: { width: 0.1, height: 0.1 },
+  };
+  private moveAmount: number = 0.01;
+  private platforms: Platform[] = [];
   private platformHeight: number = 0.04;
   private platformWidth: number = 0.14;
   private animationFrameRequest: number = 0;
   private platformsPerScreen: number = 10;
-  private velocity: number;
-  private renderer: Renderer;
-  private keys: { [key: string]: boolean };
+  private velocity: number = 0;
+  private keys: { [key: string]: boolean } = {};
   private inputHandler: InputHandler | undefined;
+  private renderer: Renderer = () => null;
 
   config: Required<Config>;
-  score: number;
-  isPaused: boolean;
-  isGameOver: boolean;
+  score: number = 0;
+  isPaused: boolean = false;
+  isGameOver: boolean = false;
 
   constructor(config: Config) {
     this.config = {
-      width: 1,
-      height: 1,
       gravity: 0.001,
       jumpHeight: 0.03,
       platformSpeed: 0.001,
       scorePerPlatform: 1,
       ...config,
     };
-    this.playerPosition = { x: 0.5, y: 0.5 };
-    this.platforms = [];
-    this.score = 0;
-    this.velocity = 0;
-    this.isPaused = false;
-    this.isGameOver = false;
-    this.renderer = config.renderer;
-    this.keys = {};
-
-    this.init();
+    this.renderer = this.config.renderer;
   }
 
   start() {
-    this.isGameOver = false;
-    this.score = 0;
-    this.generateInitialPlatforms();
     this.bindKeys();
+    this.init();
     this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
   }
 
@@ -90,7 +79,15 @@ export class DoodleJump {
   }
 
   private init() {
-    this.render();
+    this.isGameOver = false;
+    this.score = 0;
+    this.generateInitialPlatforms();
+
+    const lastPlatform = this.platforms[this.platforms.length - 1];
+    const lastPlatformCenterX =
+      lastPlatform.position.x + lastPlatform.size.width / 2;
+    this.player.position.x = lastPlatformCenterX - this.player.size.width / 2;
+    this.player.position.y = lastPlatform.position.y - this.player.size.height;
   }
 
   private bindKeys() {
@@ -99,22 +96,23 @@ export class DoodleJump {
     this.inputHandler.handleActions({
       ArrowLeft: () => this.movePlayerLeft(),
       ArrowRight: () => this.movePlayerRight(),
+      Space: () => this.pause(),
       swipeLeft: () => this.movePlayerLeft(),
       swipeRight: () => this.movePlayerRight(),
+      tap: () => this.pause(),
     });
   }
 
   private movePlayerLeft() {
-    const moveAmount = 0.05;
-    this.playerPosition.x = Math.max(0, this.playerPosition.x - moveAmount);
+    this.play();
+    this.keys["ArrowLeft"] = true;
+    this.keys["ArrowRight"] = false;
   }
 
   private movePlayerRight() {
-    const moveAmount = 0.05;
-    this.playerPosition.x = Math.min(
-      this.config.width,
-      this.playerPosition.x + moveAmount
-    );
+    this.play();
+    this.keys["ArrowRight"] = true;
+    this.keys["ArrowLeft"] = false;
   }
 
   private generateInitialPlatforms() {
@@ -125,7 +123,7 @@ export class DoodleJump {
           height: this.platformHeight,
         },
         position: {
-          x: Math.random() * (this.config.width - this.platformWidth),
+          x: Math.random() * (this.game.width - this.platformWidth),
           y: i / this.platformsPerScreen,
         },
         type: "normal",
@@ -136,9 +134,11 @@ export class DoodleJump {
   private gameLoop = () => {
     if (this.isPaused || this.isGameOver) return;
 
-    this.updatePlayer();
-    this.updatePlatforms();
-    this.checkCollisions();
+    if (Object.values(this.keys).some(Boolean)) {
+      this.updatePlayer();
+      this.updatePlatforms();
+      this.checkCollisions();
+    }
     this.render();
 
     this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
@@ -147,25 +147,31 @@ export class DoodleJump {
   private updatePlayer() {
     // Apply gravity
     this.velocity += this.config.gravity;
-    this.playerPosition.y += this.velocity;
+    this.player.position.y += this.velocity;
 
     // Horizontal movement
     if (this.keys["ArrowLeft"]) {
-      this.playerPosition.x -= 5;
+      this.player.position.x = Math.max(
+        0,
+        this.player.position.x - this.moveAmount
+      );
     }
     if (this.keys["ArrowRight"]) {
-      this.playerPosition.x += 5;
+      this.player.position.x = Math.min(
+        this.game.width - this.player.size.width,
+        this.player.position.x + this.moveAmount
+      );
     }
 
     // Boundary checks
-    if (this.playerPosition.x < 0) {
-      this.playerPosition.x = 0;
-    } else if (this.playerPosition.x > this.config.width) {
-      this.playerPosition.x = this.config.width;
+    if (this.player.position.x < 0) {
+      this.player.position.x = 0;
+    } else if (this.player.position.x > this.game.width) {
+      this.player.position.x = this.game.width;
     }
 
     // Check for game over
-    if (this.playerPosition.y > this.config.height) {
+    if (this.player.position.y > this.game.height) {
       this.isGameOver = true;
       this.destroy();
     }
@@ -179,7 +185,7 @@ export class DoodleJump {
 
     // Remove platforms that have moved off screen
     this.platforms = this.platforms.filter(
-      (platform) => platform.position.y < this.config.height
+      (platform) => platform.position.y < this.game.height
     );
 
     // Update score
@@ -189,7 +195,7 @@ export class DoodleJump {
 
     // Add new platforms
     while (this.platforms.length < this.platformsPerScreen) {
-      const x = Math.random() * (this.config.width - this.playerWidth);
+      const x = Math.random() * (this.game.width - this.player.size.width);
       const y = -this.platformHeight;
 
       this.platforms.push({
@@ -202,14 +208,18 @@ export class DoodleJump {
 
   private checkCollisions() {
     this.platforms.forEach((platform) => {
-      if (
-        this.playerPosition.x + this.playerWidth >= platform.position.x &&
-        this.playerPosition.x <= platform.position.x + this.platformWidth &&
-        this.playerPosition.y + this.playerHeight >= platform.position.y &&
-        this.playerPosition.y + this.playerHeight <=
-          platform.position.y + this.platformHeight &&
-        this.velocity > 0
-      ) {
+      const isXCollision =
+        this.player.position.x + this.player.size.width >=
+          platform.position.x &&
+        this.player.position.x <= platform.position.x + this.platformWidth;
+
+      const isYCollision =
+        this.player.position.y + this.player.size.height >=
+          platform.position.y &&
+        this.player.position.y + this.player.size.height <=
+          platform.position.y + platform.size.height;
+
+      if (isXCollision && isYCollision && this.velocity > 0) {
         // Collision detected, make the player jump
         this.velocity = -this.config.jumpHeight;
       }
@@ -217,14 +227,9 @@ export class DoodleJump {
   }
 
   private render() {
-    // Adjust the render call to account for normalized coordinates
     this.renderer({
-      player: this.playerPosition,
-      platforms: this.platforms.map((platform) => ({
-        size: platform.size,
-        position: platform.position,
-        type: platform.type,
-      })),
+      player: this.player,
+      platforms: this.platforms,
       score: this.score,
     });
   }

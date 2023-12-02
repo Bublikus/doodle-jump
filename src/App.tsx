@@ -38,12 +38,13 @@ export const App: FC = () => {
   const sortedLeaders = leaders.sort((a, b) => b.spots - a.spots).slice(0, 10);
 
   const restart = () => {
-    if (!isInstance && gameContainerRef.current) {
+    const gameContainer = gameContainerRef.current;
+
+    if (!isInstance && gameContainer) {
       isInstance = true;
-      doodleJumpRef.current = undefined;
-      doodleJumpRendererRef.current = new CanvasDoodleRenderer(
-        gameContainerRef.current
-      );
+
+      doodleJumpRendererRef.current = new CanvasDoodleRenderer(gameContainer);
+
       doodleJumpRef.current = new DoodleJump({
         renderer: (data) => {
           doodleJumpRendererRef.current?.update(data);
@@ -253,15 +254,16 @@ export const App: FC = () => {
 
         <footer>
           <strong className="help">
-            <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
             <div>
+              <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
               <div>
-                &nbsp;&nbsp;&thinsp;&thinsp;↑ &nbsp;&nbsp;&nbsp;&nbsp; - Rotate
+                <div>← → &thinsp;&thinsp; Move</div>
               </div>
-              <div>← → &thinsp;&thinsp;- Move</div>
+            </div>
+            <div>
+              <span>{isTouch ? "Tap" : "Space"} &nbsp;</span>
               <div>
-                &nbsp;&nbsp;&thinsp;&thinsp;↓ &nbsp;&nbsp;&nbsp;&nbsp; - Speed
-                up
+                <div>- Pause</div>
               </div>
             </div>
           </strong>

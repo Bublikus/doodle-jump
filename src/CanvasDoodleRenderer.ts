@@ -1,20 +1,13 @@
-type Coords = { x: number; y: number };
-type Platform = { position: Coords; type: "normal" | "moving" | "vanishing" };
-type RenderData = {
-  player: Coords;
-  platforms: Platform[];
-  score: number;
-};
+import { RenderData } from "./types";
 
 export class CanvasDoodleRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private resizeObserver: ResizeObserver;
-  private playerNormalizedSize: { width: number; height: number };
-  private platformNormalizedSize: { width: number; height: number };
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+    this.ctx = canvas.getContext("2d")!;
 
     // Resize the canvas container to adapt the canvas ratio
     this.canvas.width = canvas.clientWidth;
@@ -24,10 +17,6 @@ export class CanvasDoodleRenderer {
       this.canvas.height = entries[0].contentRect.height;
     });
     this.resizeObserver.observe(canvas);
-
-    this.ctx = canvas.getContext("2d")!;
-    this.playerNormalizedSize = { width: 0.1, height: 0.1 };
-    this.platformNormalizedSize = { width: 0.14, height: 0.04 };
   }
 
   private getCanvasX(x: number): number {
@@ -38,14 +27,6 @@ export class CanvasDoodleRenderer {
     return y * this.canvas.height;
   }
 
-  private getCanvasWidth(width: number): number {
-    return width * this.canvas.width;
-  }
-
-  private getCanvasHeight(height: number): number {
-    return height * this.canvas.height;
-  }
-
   public update({ player, platforms }: RenderData): void {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -53,10 +34,10 @@ export class CanvasDoodleRenderer {
     // Draw the player
     this.ctx.fillStyle = "blue";
     this.ctx.fillRect(
-      this.getCanvasX(player.x),
-      this.getCanvasY(player.y),
-      this.getCanvasWidth(this.playerNormalizedSize.width),
-      this.getCanvasHeight(this.playerNormalizedSize.height)
+      this.getCanvasX(player.position.x),
+      this.getCanvasY(player.position.y),
+      this.getCanvasX(player.size.width),
+      this.getCanvasY(player.size.height)
     );
 
     // Draw the platforms
@@ -65,8 +46,8 @@ export class CanvasDoodleRenderer {
       this.ctx.fillRect(
         this.getCanvasX(platform.position.x),
         this.getCanvasY(platform.position.y),
-        this.getCanvasWidth(this.platformNormalizedSize.width),
-        this.getCanvasHeight(this.platformNormalizedSize.height)
+        this.getCanvasX(platform.size.width),
+        this.getCanvasY(platform.size.height)
       );
     });
   }
