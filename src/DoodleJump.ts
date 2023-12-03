@@ -61,14 +61,10 @@ export class DoodleJump {
 
   pause() {
     this.isPaused = true;
-    // cancelAnimationFrame(this.animationFrameRequest);
   }
 
   play() {
-    if (this.isPaused) {
-      this.isPaused = false;
-      // this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
-    }
+    this.isPaused = false;
   }
 
   destroy() {
@@ -139,6 +135,8 @@ export class DoodleJump {
     // Don't update game logic if the game is paused or over
     if (this.isPaused || this.isGameOver) return;
 
+    console.log(this.player.position.y);
+
     // Update game logic
     if (Object.values(this.keys).some(Boolean)) {
       this.updatePlayer();
@@ -156,15 +154,15 @@ export class DoodleJump {
 
   private updatePlayer() {
     // calculate the player distance from the half of the screen
-    const distanceFromHalf = Math.min(
+    const distanceAboveHalf = Math.max(
       0,
-      this.player.position.y - this.game.height / 2
+      this.game.height / 2 - this.player.position.y
     );
 
     // Apply gravity
     this.velocity += this.config.gravity * this.deltaTime;
     this.player.position.y +=
-      (this.velocity - distanceFromHalf) * this.deltaTime;
+      (this.velocity + distanceAboveHalf) * this.deltaTime;
 
     // Horizontal movement
     if (this.keys["ArrowLeft"]) {
@@ -196,12 +194,12 @@ export class DoodleJump {
 
   private updatePlatforms() {
     // calculate the player distance from the half of the screen
-    const distanceFromHalf = Math.min(
+    const distanceAboveHalf = Math.max(
       0,
-      this.player.position.y - this.game.height / 2
+      this.game.height / 2 - this.player.position.y
     );
 
-    const movement = -(this.velocity + distanceFromHalf) * this.deltaTime;
+    const movement = -(this.velocity - distanceAboveHalf) * this.deltaTime;
 
     this.platforms.forEach((platform) => {
       platform.position.y += movement;

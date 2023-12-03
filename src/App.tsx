@@ -141,8 +141,6 @@ export const App: FC = () => {
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         doodleJumpRef.current?.pause();
-      } else if (!isOverlayRef.current) {
-        doodleJumpRef.current?.play();
       }
     });
 
