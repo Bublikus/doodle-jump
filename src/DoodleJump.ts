@@ -135,8 +135,6 @@ export class DoodleJump {
     // Don't update game logic if the game is paused or over
     if (this.isPaused || this.isGameOver) return;
 
-    console.log(this.player.position.y);
-
     // Update game logic
     if (Object.values(this.keys).some(Boolean)) {
       this.updatePlayer();
