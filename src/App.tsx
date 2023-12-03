@@ -10,7 +10,7 @@ import {
 } from "./firebase";
 import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
 import bgImg from "./bg.jpg";
-import swipeImg from "./swipe-all-directions.png";
+import swipeImg from "./swipe-horizontal.png";
 import tapImg from "./tap.png";
 import "./style.css";
 
