@@ -61,13 +61,13 @@ export class DoodleJump {
 
   pause() {
     this.isPaused = true;
-    cancelAnimationFrame(this.animationFrameRequest);
+    // cancelAnimationFrame(this.animationFrameRequest);
   }
 
   play() {
     if (this.isPaused) {
       this.isPaused = false;
-      this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
+      // this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
     }
   }
 
@@ -130,21 +130,28 @@ export class DoodleJump {
   }
 
   private gameLoop = (time: number) => {
-    if (this.isPaused || this.isGameOver) return;
+    this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
 
+    // Calculate delta time
     this.deltaTime = (time - this.lastFrameTime) / 1000;
     this.lastFrameTime = time;
 
+    // Don't update game logic if the game is paused or over
+    if (this.isPaused || this.isGameOver) return;
+
+    // Update game logic
     if (Object.values(this.keys).some(Boolean)) {
       this.updatePlayer();
+
+      // Update platforms if the player is near the top of the screen
       if (this.player.position.y < this.game.height / 2 && this.velocity < 0) {
         this.updatePlatforms();
       }
+
       this.checkCollisions();
     }
-    this.render();
 
-    this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
+    this.render();
   };
 
   private updatePlayer() {
