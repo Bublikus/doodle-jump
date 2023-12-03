@@ -1,4 +1,16 @@
 import { RenderData } from "./types";
+import { CanvasImageLoader } from "./CanvasImageLoader";
+import platformImg from "./platform.png";
+import doodleRightImg from "./doodle-right.png";
+
+const imageLoader = new CanvasImageLoader();
+
+const imagesMap = new Map<string, CanvasImageSource>();
+
+imageLoader.loadMultipleImages([platformImg, doodleRightImg]).then(() => {
+  imagesMap.set(platformImg, imageLoader.getImage(platformImg)!);
+  imagesMap.set(doodleRightImg, imageLoader.getImage(doodleRightImg)!);
+});
 
 export class CanvasDoodleRenderer {
   private canvas: HTMLCanvasElement;
@@ -31,19 +43,23 @@ export class CanvasDoodleRenderer {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw the player
-    this.ctx.fillStyle = "blue";
-    this.ctx.fillRect(
+    if (!imagesMap.has(doodleRightImg) || !imagesMap.has(platformImg)) {
+      return;
+    }
+
+    // Draw the player image
+    this.ctx.drawImage(
+      imagesMap.get(doodleRightImg)!,
       this.getCanvasX(player.position.x),
       this.getCanvasY(player.position.y),
       this.getCanvasX(player.size.width),
       this.getCanvasY(player.size.height)
     );
 
-    // Draw the platforms
-    this.ctx.fillStyle = "green";
+    // Draw the platforms images
     platforms.forEach((platform) => {
-      this.ctx.fillRect(
+      this.ctx.drawImage(
+        imagesMap.get(platformImg)!,
         this.getCanvasX(platform.position.x),
         this.getCanvasY(platform.position.y),
         this.getCanvasX(platform.size.width),
