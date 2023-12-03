@@ -5,8 +5,6 @@ type Config = {
   renderer: Renderer;
   gravity?: number;
   jumpHeight?: number;
-  platformSpeed?: number;
-  scorePerPlatform?: number;
 };
 
 type Coords = { x: number; y: number };
@@ -28,13 +26,15 @@ export class DoodleJump {
     position: { x: 0, y: 0 },
     size: { width: 0.1, height: 0.1 },
   };
-  private moveAmount: number = 0.01;
+  private moveAmount: number = 0.005;
   private platforms: Platform[] = [];
   private platformHeight: number = 0.04;
   private platformWidth: number = 0.14;
   private animationFrameRequest: number = 0;
   private platformsPerScreen: number = 10;
   private velocity: number = 0;
+  private lastFrameTime: number = 0;
+  private deltaTime: number = 0;
   private keys: { [key: string]: boolean } = {};
   private inputHandler: InputHandler | undefined;
   private renderer: Renderer = () => null;
@@ -46,10 +46,8 @@ export class DoodleJump {
 
   constructor(config: Config) {
     this.config = {
-      gravity: 0.0001,
-      jumpHeight: 0.008,
-      platformSpeed: 0.0001,
-      scorePerPlatform: 1,
+      gravity: 0.4,
+      jumpHeight: 0.5,
       ...config,
     };
     this.renderer = this.config.renderer;
@@ -131,8 +129,11 @@ export class DoodleJump {
     }
   }
 
-  private gameLoop = () => {
+  private gameLoop = (time: number) => {
     if (this.isPaused || this.isGameOver) return;
+
+    this.deltaTime = (time - this.lastFrameTime) / 1000;
+    this.lastFrameTime = time;
 
     if (Object.values(this.keys).some(Boolean)) {
       this.updatePlayer();
@@ -148,8 +149,8 @@ export class DoodleJump {
 
   private updatePlayer() {
     // Apply gravity
-    this.velocity += this.config.gravity;
-    this.player.position.y += this.velocity;
+    this.velocity += this.config.gravity * this.deltaTime;
+    this.player.position.y += this.velocity * this.deltaTime;
 
     // Horizontal movement
     if (this.keys["ArrowLeft"]) {
@@ -180,7 +181,7 @@ export class DoodleJump {
   }
 
   private updatePlatforms() {
-    const movement = -this.velocity;
+    const movement = -this.velocity * this.deltaTime;
     this.platforms.forEach((platform) => {
       platform.position.y += movement;
     });
