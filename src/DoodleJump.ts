@@ -190,6 +190,11 @@ export class DoodleJump {
       (platform) => platform.position.y < this.game.height
     );
 
+    // Update score
+    const filteredPlatformsAmount =
+      this.platformsPerScreen - this.platforms.length;
+    this.score += filteredPlatformsAmount;
+
     // Add new platforms at the top as needed
     while (this.platforms.length < this.platformsPerScreen) {
       const x = Math.random() * (this.game.width - this.platformWidth);
