@@ -155,9 +155,16 @@ export class DoodleJump {
   };
 
   private updatePlayer() {
+    // calculate the player distance from the half of the screen
+    const distanceFromHalf = Math.min(
+      0,
+      this.player.position.y - this.game.height / 2
+    );
+
     // Apply gravity
     this.velocity += this.config.gravity * this.deltaTime;
-    this.player.position.y += this.velocity * this.deltaTime;
+    this.player.position.y +=
+      (this.velocity - distanceFromHalf) * this.deltaTime;
 
     // Horizontal movement
     if (this.keys["ArrowLeft"]) {
@@ -188,7 +195,14 @@ export class DoodleJump {
   }
 
   private updatePlatforms() {
-    const movement = -this.velocity * this.deltaTime;
+    // calculate the player distance from the half of the screen
+    const distanceFromHalf = Math.min(
+      0,
+      this.player.position.y - this.game.height / 2
+    );
+
+    const movement = -(this.velocity + distanceFromHalf) * this.deltaTime;
+
     this.platforms.forEach((platform) => {
       platform.position.y += movement;
     });
