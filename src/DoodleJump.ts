@@ -35,7 +35,6 @@ export class DoodleJump {
   private velocity: number = 0;
   private lastFrameTime: number = 0;
   private deltaTime: number = 0;
-  private keys: { [key: string]: boolean } = {};
   private inputHandler: InputHandler | undefined;
   private renderer: Renderer = () => null;
 
@@ -46,8 +45,8 @@ export class DoodleJump {
 
   constructor(config: Config) {
     this.config = {
-      gravity: 0.4,
-      jumpHeight: 0.5,
+      gravity: 0.9,
+      jumpHeight: 0.8,
       ...config,
     };
     this.renderer = this.config.renderer;
@@ -86,7 +85,10 @@ export class DoodleJump {
 
   private bindKeys() {
     this.inputHandler?.destroy();
-    this.inputHandler = new InputHandler({ swipeTickThresholdPX: 20 });
+    this.inputHandler = new InputHandler({
+      swipeTickThresholdPX: 20,
+      fireKeyHoldPerFrame: true,
+    });
     this.inputHandler.handleActions({
       ArrowLeft: () => this.movePlayerLeft(),
       ArrowRight: () => this.movePlayerRight(),
@@ -99,14 +101,18 @@ export class DoodleJump {
 
   private movePlayerLeft() {
     this.play();
-    this.keys["ArrowLeft"] = true;
-    this.keys["ArrowRight"] = false;
+    this.player.position.x = Math.max(
+      0,
+      this.player.position.x - this.moveAmount
+    );
   }
 
   private movePlayerRight() {
     this.play();
-    this.keys["ArrowRight"] = true;
-    this.keys["ArrowLeft"] = false;
+    this.player.position.x = Math.min(
+      this.game.width - this.player.size.width,
+      this.player.position.x + this.moveAmount
+    );
   }
 
   private generateInitialPlatforms() {
@@ -136,16 +142,14 @@ export class DoodleJump {
     if (this.isPaused || this.isGameOver) return;
 
     // Update game logic
-    if (Object.values(this.keys).some(Boolean)) {
-      this.updatePlayer();
+    this.updatePlayer();
 
-      // Update platforms if the player is near the top of the screen
-      if (this.player.position.y < this.game.height / 2 && this.velocity < 0) {
-        this.updatePlatforms();
-      }
-
-      this.checkCollisions();
+    // Update platforms if the player is near the top of the screen
+    if (this.player.position.y < this.game.height / 2 && this.velocity < 0) {
+      this.updatePlatforms();
     }
+
+    this.checkCollisions();
 
     this.render();
   };
@@ -161,20 +165,6 @@ export class DoodleJump {
     this.velocity += this.config.gravity * this.deltaTime;
     this.player.position.y +=
       (this.velocity + distanceAboveHalf) * this.deltaTime;
-
-    // Horizontal movement
-    if (this.keys["ArrowLeft"]) {
-      this.player.position.x = Math.max(
-        0,
-        this.player.position.x - this.moveAmount
-      );
-    }
-    if (this.keys["ArrowRight"]) {
-      this.player.position.x = Math.min(
-        this.game.width - this.player.size.width,
-        this.player.position.x + this.moveAmount
-      );
-    }
 
     // Boundary checks
     if (this.player.position.x < 0) {
