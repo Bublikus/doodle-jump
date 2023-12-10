@@ -47,15 +47,6 @@ export class CanvasDoodleRenderer {
       return;
     }
 
-    // Draw the player image
-    this.ctx.drawImage(
-      imagesMap.get(doodleRightImg)!,
-      this.getCanvasX(player.position.x),
-      this.getCanvasY(player.position.y),
-      this.getCanvasX(player.size.width),
-      this.getCanvasY(player.size.height)
-    );
-
     // Draw the platforms images
     platforms.forEach((platform) => {
       this.ctx.drawImage(
@@ -66,6 +57,34 @@ export class CanvasDoodleRenderer {
         this.getCanvasY(platform.size.height)
       );
     });
+
+    // Draw the player image
+    this.ctx.drawImage(
+      imagesMap.get(doodleRightImg)!,
+      this.getCanvasX(player.position.x),
+      this.getCanvasY(player.position.y),
+      this.getCanvasX(player.size.width),
+      this.getCanvasY(player.size.height)
+    );
+
+    // Draw the second player image if the player is near the left or right edge of the screen
+    // if (player.position.x < 0) {
+    //   this.ctx.drawImage(
+    //     imagesMap.get(doodleRightImg)!,
+    //     this.getCanvasX(player.position.x + 1),
+    //     this.getCanvasY(player.position.y),
+    //     this.getCanvasX(player.size.width),
+    //     this.getCanvasY(player.size.height)
+    //   );
+    // } else if (player.position.x + player.size.width > 1) {
+    //   this.ctx.drawImage(
+    //     imagesMap.get(doodleRightImg)!,
+    //     this.getCanvasX(player.position.x - 1),
+    //     this.getCanvasY(player.position.y),
+    //     this.getCanvasX(player.size.width),
+    //     this.getCanvasY(player.size.height)
+    //   );
+    // }
   }
 
   public destroy() {

@@ -27,6 +27,9 @@ export class DoodleJump {
     size: { width: 0.1, height: 0.1 },
   };
   private moveAmount: number = 0.005;
+  private acceleration: number = 0;
+  private accelerationFactor: number = 0.0001;
+  private accelerationMax: number = 0.001;
   private platforms: Platform[] = [];
   private platformHeight: number = 0.04;
   private platformWidth: number = 0.14;
@@ -45,8 +48,8 @@ export class DoodleJump {
 
   constructor(config: Config) {
     this.config = {
-      gravity: 0.9,
-      jumpHeight: 0.8,
+      gravity: 1,
+      jumpHeight: 0.9,
       ...config,
     };
     this.renderer = this.config.renderer;
@@ -86,7 +89,7 @@ export class DoodleJump {
   private bindKeys() {
     this.inputHandler?.destroy();
     this.inputHandler = new InputHandler({
-      swipeTickThresholdPX: 20,
+      swipeTickThresholdPX: 1,
       fireKeyHoldPerFrame: true,
     });
     this.inputHandler.handleActions({
@@ -101,18 +104,20 @@ export class DoodleJump {
 
   private movePlayerLeft() {
     this.play();
-    this.player.position.x = Math.max(
-      0,
-      this.player.position.x - this.moveAmount
+    this.acceleration = Math.min(
+      this.accelerationMax,
+      this.acceleration + this.accelerationFactor
     );
+    this.player.position.x -= this.moveAmount + this.acceleration;
   }
 
   private movePlayerRight() {
     this.play();
-    this.player.position.x = Math.min(
-      this.game.width - this.player.size.width,
-      this.player.position.x + this.moveAmount
+    this.acceleration = Math.min(
+      this.accelerationMax,
+      this.acceleration + this.accelerationFactor
     );
+    this.player.position.x += this.moveAmount + this.acceleration;
   }
 
   private generateInitialPlatforms() {
@@ -161,16 +166,21 @@ export class DoodleJump {
       this.game.height / 2 - this.player.position.y
     );
 
+    this.acceleration = Math.max(
+      0,
+      this.acceleration - this.accelerationFactor / 2
+    );
+
     // Apply gravity
     this.velocity += this.config.gravity * this.deltaTime;
     this.player.position.y +=
-      (this.velocity + distanceAboveHalf) * this.deltaTime;
+      this.velocity * this.deltaTime + distanceAboveHalf;
 
     // Boundary checks
-    if (this.player.position.x < 0) {
-      this.player.position.x = 0;
-    } else if (this.player.position.x > this.game.width) {
+    if (this.player.position.x < -this.player.size.width) {
       this.player.position.x = this.game.width;
+    } else if (this.player.position.x > this.game.width) {
+      this.player.position.x = -this.player.size.width;
     }
 
     // Check for game over
@@ -187,7 +197,9 @@ export class DoodleJump {
       this.game.height / 2 - this.player.position.y
     );
 
-    const movement = -(this.velocity - distanceAboveHalf) * this.deltaTime;
+    const movement =
+      -this.velocity * this.deltaTime +
+      (this.velocity < 0 ? distanceAboveHalf : 0) * this.deltaTime;
 
     this.platforms.forEach((platform) => {
       platform.position.y += movement;
