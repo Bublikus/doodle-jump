@@ -1,7 +1,7 @@
 import { RenderData } from "./types";
 import { CanvasImageLoader } from "./CanvasImageLoader";
-import platformImg from "./platform.png";
-import doodleRightImg from "./doodle-right.png";
+import platformImg from "./assets/platform.png";
+import doodleRightImg from "./assets/doodle-right.png";
 
 const imageLoader = new CanvasImageLoader();
 
@@ -15,6 +15,7 @@ imageLoader.loadMultipleImages([platformImg, doodleRightImg]).then(() => {
 export class CanvasDoodleRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private canvasRatio: number;
   private resizeObserver: ResizeObserver;
 
   constructor(canvas: HTMLCanvasElement) {
@@ -24,9 +25,11 @@ export class CanvasDoodleRenderer {
     // Resize the canvas container to adapt the canvas ratio
     this.canvas.width = canvas.clientWidth;
     this.canvas.height = canvas.clientHeight;
+    this.canvasRatio = this.canvas.width / this.canvas.height;
     this.resizeObserver = new ResizeObserver((entries) => {
       this.canvas.width = entries[0].contentRect.width;
       this.canvas.height = entries[0].contentRect.height;
+      this.canvasRatio = this.canvas.width / this.canvas.height;
     });
     this.resizeObserver.observe(canvas);
   }
@@ -49,42 +52,33 @@ export class CanvasDoodleRenderer {
 
     // Draw the platforms images
     platforms.forEach((platform) => {
+      const platformImage = imagesMap.get(platformImg)!;
+      // @ts-ignore
+      const platformAspectRatio = platformImage.width / platformImage.height;
       this.ctx.drawImage(
-        imagesMap.get(platformImg)!,
+        platformImage,
         this.getCanvasX(platform.position.x),
         this.getCanvasY(platform.position.y),
         this.getCanvasX(platform.size.width),
-        this.getCanvasY(platform.size.height)
+        this.getCanvasY(
+          (platform.size.width / platformAspectRatio) * this.canvasRatio
+        )
       );
     });
 
     // Draw the player image
+    const playerImage = imagesMap.get(doodleRightImg)!;
+    // @ts-ignore
+    const playerAspectRatio = playerImage.width / playerImage.height;
     this.ctx.drawImage(
-      imagesMap.get(doodleRightImg)!,
+      playerImage,
       this.getCanvasX(player.position.x),
       this.getCanvasY(player.position.y),
       this.getCanvasX(player.size.width),
-      this.getCanvasY(player.size.height)
+      this.getCanvasY(
+        (player.size.width / playerAspectRatio) * this.canvasRatio
+      )
     );
-
-    // Draw the second player image if the player is near the left or right edge of the screen
-    // if (player.position.x < 0) {
-    //   this.ctx.drawImage(
-    //     imagesMap.get(doodleRightImg)!,
-    //     this.getCanvasX(player.position.x + 1),
-    //     this.getCanvasY(player.position.y),
-    //     this.getCanvasX(player.size.width),
-    //     this.getCanvasY(player.size.height)
-    //   );
-    // } else if (player.position.x + player.size.width > 1) {
-    //   this.ctx.drawImage(
-    //     imagesMap.get(doodleRightImg)!,
-    //     this.getCanvasX(player.position.x - 1),
-    //     this.getCanvasY(player.position.y),
-    //     this.getCanvasX(player.size.width),
-    //     this.getCanvasY(player.size.height)
-    //   );
-    // }
   }
 
   public destroy() {
