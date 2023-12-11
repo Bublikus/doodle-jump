@@ -1,6 +1,8 @@
 import { InputHandler } from "./InputHandler";
 import { RenderData } from "./types";
 
+const isTouch = Boolean("ontouchstart" in window || navigator.maxTouchPoints);
+
 type Config = {
   renderer: Renderer;
   gravity?: number;
@@ -26,10 +28,9 @@ export class DoodleJump {
     position: { x: 0, y: 0 },
     size: { width: 0.1, height: 0.1 },
   };
-  private moveAmount: number = 0.005;
   private acceleration: number = 0;
-  private accelerationFactor: number = 0.0001;
-  private accelerationMax: number = 0.001;
+  private accelerationFactor: number = 0.5 * (isTouch ? 2 : 1);
+  private accelerationMax: number = 3 * (isTouch ? 2 : 1);
   private platforms: Platform[] = [];
   private platformHeight: number = 0.04;
   private platformWidth: number = 0.14;
@@ -49,7 +50,7 @@ export class DoodleJump {
   constructor(config: Config) {
     this.config = {
       gravity: 1,
-      jumpHeight: 0.9,
+      jumpHeight: 0.8,
       ...config,
     };
     this.renderer = this.config.renderer;
@@ -104,20 +105,18 @@ export class DoodleJump {
 
   private movePlayerLeft() {
     this.play();
-    this.acceleration = Math.min(
-      this.accelerationMax,
-      this.acceleration + this.accelerationFactor
+    this.acceleration = Math.max(
+      -this.accelerationMax,
+      this.acceleration - this.accelerationFactor
     );
-    this.player.position.x -= this.moveAmount + this.acceleration;
   }
 
   private movePlayerRight() {
     this.play();
     this.acceleration = Math.min(
-      this.accelerationMax,
-      this.acceleration + this.accelerationFactor
+      this.acceleration + this.accelerationFactor,
+      this.accelerationMax
     );
-    this.player.position.x += this.moveAmount + this.acceleration;
   }
 
   private generateInitialPlatforms() {
@@ -166,15 +165,18 @@ export class DoodleJump {
       this.game.height / 2 - this.player.position.y
     );
 
-    this.acceleration = Math.max(
-      0,
-      this.acceleration - this.accelerationFactor / 2
-    );
-
     // Apply gravity
     this.velocity += this.config.gravity * this.deltaTime;
     this.player.position.y +=
       this.velocity * this.deltaTime + distanceAboveHalf;
+
+    // Move the player left or right
+    this.acceleration /= 2;
+    this.acceleration = Math.max(
+      -this.accelerationMax,
+      Math.min(this.acceleration, this.accelerationMax)
+    );
+    this.player.position.x += this.acceleration * this.deltaTime;
 
     // Boundary checks
     if (this.player.position.x < -this.player.size.width) {
