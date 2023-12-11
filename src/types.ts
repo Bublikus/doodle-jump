@@ -10,4 +10,5 @@ export type RenderData = {
   player: { position: Coords; size: Size };
   platforms: Platform[];
   score: number;
+  isGameOver: boolean;
 };

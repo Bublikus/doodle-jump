@@ -4,9 +4,9 @@ import {
   addPayerToLeaderboard,
   getLeaderboard,
   Leader,
-  trackTetrisGameFinish,
-  trackTetrisGameRestart,
-  trackTetrisSignGameFinish,
+  trackGameFinish,
+  trackGameRestart,
+  trackSignGameFinish,
 } from "./firebase";
 import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
 import bgImg from "./assets/bg.jpg";
@@ -22,46 +22,45 @@ export const App: FC = () => {
   const doodleJumpRef = useRef<DoodleJump>();
   const doodleJumpRendererRef = useRef<CanvasDoodleRenderer>();
   const gameContainerRef = useRef<HTMLCanvasElement>(null);
-  const isOverlayRef = useRef(false);
 
   const defaultName = useRef(localStorage.getItem("playerName"));
 
   const [loading, setLoading] = useState(true);
   const [score, setScore] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
-  isOverlayRef.current = isShownLeaderboard || isShownInstructions;
-
-  const sortedLeaders = leaders.sort((a, b) => b.spots - a.spots).slice(0, 10);
+  const sortedLeaders = leaders.sort((a, b) => b.score - a.score).slice(0, 10);
 
   const restart = () => {
     const gameContainer = gameContainerRef.current;
 
     if (!isInstance && gameContainer) {
-      isInstance = true;
-
-      doodleJumpRendererRef.current = new CanvasDoodleRenderer(gameContainer);
+      doodleJumpRendererRef.current =
+        doodleJumpRendererRef.current ||
+        new CanvasDoodleRenderer(gameContainer);
 
       doodleJumpRef.current = new DoodleJump({
         renderer: (data) => {
           doodleJumpRendererRef.current?.update(data);
           setScore(data.score);
+          setIsGameOver(data.isGameOver);
         },
-      });
-      doodleJumpRef.current.start();
+      }).start();
+
+      isInstance = true;
     }
   };
 
   const handleRestart = () => {
     setIsShownLeaderboard(false);
-    setOwnId("");
-    trackTetrisGameRestart();
-    restart();
     setIsShownInstructions(false);
-    doodleJumpRef.current?.play();
+    setOwnId("");
+    trackGameRestart();
+    restart();
   };
 
   useEffect(() => {
@@ -70,15 +69,15 @@ export const App: FC = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (doodleJumpRef.current?.score) {
-        trackTetrisGameFinish(doodleJumpRef.current?.score || 0);
+      if (score) {
+        trackGameFinish(score);
 
         const promptPlayer = () => {
           let playerName;
 
           while (true) {
             const player = prompt(
-              `Spots: 🚀${doodleJumpRef.current?.score}\n👤Enter your name: `,
+              `Score: 🚀${score}\n👤Enter your name: `,
               defaultName.current ?? undefined
             );
 
@@ -90,34 +89,34 @@ export const App: FC = () => {
           return playerName;
         };
 
-        const playerName = promptPlayer();
+        // const playerName = promptPlayer();
 
-        if (playerName) {
-          const playerId = await addPayerToLeaderboard(
-            playerName,
-            doodleJumpRef.current?.score || 0
-          );
-
-          localStorage.setItem("playerName", playerName);
-          defaultName.current = playerName;
-
-          if (playerId) setOwnId(playerId);
-
-          trackTetrisSignGameFinish(
-            doodleJumpRef.current?.score || 0,
-            playerName
-          );
-
-          await getLeaderboard().then(setLeaders);
-        }
+        // if (playerName) {
+        //   const playerId = await addPayerToLeaderboard(
+        //     playerName,
+        //     score
+        //   );
+        //
+        //   localStorage.setItem("playerName", playerName);
+        //   defaultName.current = playerName;
+        //
+        //   if (playerId) setOwnId(playerId);
+        //
+        //   trackTetrisSignGameFinish(
+        //     score,
+        //     playerName
+        //   );
+        //
+        //   await getLeaderboard().then(setLeaders);
+        // }
       }
 
       isInstance = false;
       doodleJumpRef.current?.destroy();
     };
 
-    // if (doodleJumpRef.current?.isGameOver) endGame();
-  }, [doodleJumpRef.current?.isGameOver]);
+    if (isGameOver) endGame();
+  }, [isGameOver]);
 
   useEffect(() => {
     if (!loading && !isShownInstructions) restart();
@@ -125,11 +124,6 @@ export const App: FC = () => {
 
   useEffect(() => {
     getLeaderboard().then(setLeaders);
-
-    if (isShownInstructions) {
-      restart();
-      doodleJumpRef.current?.pause();
-    }
   }, []);
 
   useEffect(() => {
@@ -210,7 +204,7 @@ export const App: FC = () => {
 
         <header>
           <h1>Double Jump Game</h1>
-          <h3>Spots: 🚀{score}</h3>
+          <h3>Score: 🚀{score}</h3>
         </header>
 
         <canvas ref={gameContainerRef} className="game-container" />
@@ -224,7 +218,7 @@ export const App: FC = () => {
                   <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>Spots</th>
+                    <th>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -241,7 +235,7 @@ export const App: FC = () => {
                         </span>
                       </td>
                       <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
-                      <td>🚀{leader.spots}</td>
+                      <td>🚀{leader.score}</td>
                     </tr>
                   ))}
                 </tbody>

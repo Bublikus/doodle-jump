@@ -17,7 +17,7 @@ const firebaseConfig = {
   storageBucket: "little-doodle-jump-game.appspot.com",
   messagingSenderId: "817358213091",
   appId: "1:817358213091:web:716f6e03f96b3a756b9ad6",
-  measurementId: "G-DLSPDLT6ZH"
+  measurementId: "G-DLSPDLT6ZH",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,14 +30,14 @@ export const analytics = getAnalytics(app);
 export type Leader = {
   id: string;
   player: string;
-  spots: number;
+  score: number;
   date: string;
 };
 
 export async function getLeaderboard(): Promise<Leader[]> {
   try {
     const colRef = collection(db, "leaderboard");
-    const q = query(colRef, orderBy("spots", "desc"), limit(10));
+    const q = query(colRef, orderBy("score", "desc"), limit(10));
     const docsRef = await getDocs(q);
 
     return (
@@ -49,12 +49,12 @@ export async function getLeaderboard(): Promise<Leader[]> {
   }
 }
 
-export async function addPayerToLeaderboard(player: string, spots: number) {
+export async function addPayerToLeaderboard(player: string, score: number) {
   try {
-    if (!player || !spots) throw new Error("Invalid request body");
+    if (!player || !score) throw new Error("Invalid request body");
     const docRef = await addDoc(collection(db, "leaderboard"), {
       player,
-      spots,
+      score,
       date: new Date().toISOString(),
     });
     return docRef.id;
@@ -65,19 +65,19 @@ export async function addPayerToLeaderboard(player: string, spots: number) {
 
 // Analytics
 
-export function trackTetrisGameFinish(spots: number) {
+export function trackGameFinish(score: number) {
   logEvent(analytics, "double_jump_game_finish", {
-    spots,
+    score,
   });
 }
 
-export function trackTetrisSignGameFinish(spots: number, player: string) {
+export function trackSignGameFinish(score: number, player: string) {
   logEvent(analytics, "double_jump_sign_game_finish", {
-    spots,
+    score,
     player,
   });
 }
 
-export function trackTetrisGameRestart() {
+export function trackGameRestart() {
   logEvent(analytics, "double_jump_game_restart");
 }

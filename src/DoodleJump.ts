@@ -54,12 +54,14 @@ export class DoodleJump {
       ...config,
     };
     this.renderer = this.config.renderer;
+    return this;
   }
 
   start() {
     this.bindKeys();
     this.init();
     this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
+    return this;
   }
 
   pause() {
@@ -77,14 +79,15 @@ export class DoodleJump {
 
   private init() {
     this.isGameOver = false;
+    this.lastFrameTime = 0;
+    this.deltaTime = 0;
     this.score = 0;
-    this.generateInitialPlatforms();
+    this.acceleration = 0;
+    this.velocity = 0;
+    this.platforms = [];
 
-    const lastPlatform = this.platforms[this.platforms.length - 1];
-    const lastPlatformCenterX =
-      lastPlatform.position.x + lastPlatform.size.width / 2;
-    this.player.position.x = lastPlatformCenterX - this.player.size.width / 2;
-    this.player.position.y = lastPlatform.position.y - this.player.size.height;
+    this.generateInitialPlatforms();
+    this.generateInitialPlayer();
   }
 
   private bindKeys() {
@@ -133,6 +136,14 @@ export class DoodleJump {
         type: "normal",
       });
     }
+  }
+
+  private generateInitialPlayer() {
+    const lastPlatform = this.platforms[this.platforms.length - 1];
+    const lastPlatformCenterX =
+      lastPlatform.position.x + lastPlatform.size.width / 2;
+    this.player.position.x = lastPlatformCenterX - this.player.size.width / 2;
+    this.player.position.y = lastPlatform.position.y - this.player.size.height;
   }
 
   private gameLoop = (time: number) => {
@@ -186,8 +197,9 @@ export class DoodleJump {
     }
 
     // Check for game over
-    if (this.player.position.y > this.game.height) {
+    if (this.player.position.y > this.game.height && !this.isGameOver) {
       this.isGameOver = true;
+      this.render();
       this.destroy();
     }
   }
@@ -255,6 +267,7 @@ export class DoodleJump {
       player: this.player,
       platforms: this.platforms,
       score: this.score,
+      isGameOver: this.isGameOver,
     });
   }
 }
