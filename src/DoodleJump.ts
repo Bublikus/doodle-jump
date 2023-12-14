@@ -155,8 +155,9 @@ export class DoodleJump {
 
   private generateInitialPlayer() {
     const lastPlatform = this.platforms[this.platforms.length - 1];
-    const lastPlatformCenterX =
-      lastPlatform.position.x + lastPlatform.size.width / 2;
+    const lastPlatformWidth = lastPlatform.size.width;
+    const lastPlatformCenterX = lastPlatform.position.x + lastPlatformWidth / 2;
+
     this.player.position.x = lastPlatformCenterX - this.player.size.width / 2;
     this.player.position.y = lastPlatform.position.y - this.player.size.height;
   }
@@ -165,7 +166,8 @@ export class DoodleJump {
     this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
 
     // Calculate delta time
-    this.deltaTime = (time - this.lastFrameTime) / 1000;
+    const delta = time - this.lastFrameTime;
+    this.deltaTime = this.lastFrameTime ? delta / 1000 : 0;
     this.lastFrameTime = time;
 
     // Don't update game logic if the game is paused or over
@@ -182,6 +184,10 @@ export class DoodleJump {
     this.checkCollisions();
 
     this.render();
+
+    if (this.isGameOver) {
+      this.destroy();
+    }
   };
 
   private updatePlayer() {
@@ -214,8 +220,6 @@ export class DoodleJump {
     // Check for game over
     if (this.player.position.y > this.game.height && !this.isGameOver) {
       this.isGameOver = true;
-      this.render();
-      this.destroy();
     }
   }
 

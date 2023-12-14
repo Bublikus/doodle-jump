@@ -43,13 +43,16 @@ export const App: FC = () => {
         doodleJumpRendererRef.current ||
         new CanvasDoodleRenderer(gameContainer);
 
-      doodleJumpRef.current = new DoodleJump({
-        renderer: (data) => {
-          doodleJumpRendererRef.current?.update(data);
-          setScore(data.score);
-          setIsGameOver(data.isGameOver);
-        },
-      }).start();
+      doodleJumpRef.current =
+        doodleJumpRef.current ||
+        new DoodleJump({
+          renderer: (data) => {
+            doodleJumpRendererRef.current?.update(data);
+            setScore(data.score);
+            setIsGameOver(data.isGameOver);
+          },
+        });
+      doodleJumpRef.current.start();
 
       isInstance = true;
     }
