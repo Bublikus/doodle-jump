@@ -123,16 +123,31 @@ export class DoodleJump {
   }
 
   private generateInitialPlatforms() {
+    const xRange = this.game.width - this.platformWidth;
+    let firstPlatformX = this.game.width / 2 - this.platformWidth / 2;
+
     for (let i = 0; i < this.platformsPerScreen; i++) {
+      let x = Math.random() * xRange;
+      const y = i / this.platformsPerScreen;
+
+      // Make sure the first platform is always in the middle
+      if (i === this.platformsPerScreen - 1) {
+        x = firstPlatformX;
+      }
+
+      // Make sure the second to 4th platforms are always X away from the first 4 platforms
+      if (this.platformsPerScreen - i > 1 && this.platformsPerScreen - i < 5) {
+        const range1 = (x / xRange) * (firstPlatformX - this.platformWidth);
+        const range2 = range1 + (firstPlatformX + this.platformWidth);
+        x = Math.random() > 0.5 ? range1 : range2;
+      }
+
       this.platforms.push({
         size: {
           width: this.platformWidth,
           height: this.platformHeight,
         },
-        position: {
-          x: Math.random() * (this.game.width - this.platformWidth),
-          y: i / this.platformsPerScreen,
-        },
+        position: { x, y },
         type: "normal",
       });
     }
