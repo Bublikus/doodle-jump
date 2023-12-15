@@ -92,26 +92,20 @@ export const App: FC = () => {
           return playerName;
         };
 
-        // const playerName = promptPlayer();
+        const playerName = promptPlayer();
 
-        // if (playerName) {
-        //   const playerId = await addPayerToLeaderboard(
-        //     playerName,
-        //     score
-        //   );
-        //
-        //   localStorage.setItem("playerName", playerName);
-        //   defaultName.current = playerName;
-        //
-        //   if (playerId) setOwnId(playerId);
-        //
-        //   trackTetrisSignGameFinish(
-        //     score,
-        //     playerName
-        //   );
-        //
-        //   await getLeaderboard().then(setLeaders);
-        // }
+        if (playerName) {
+          const playerId = await addPayerToLeaderboard(playerName, score);
+
+          localStorage.setItem("playerName", playerName);
+          defaultName.current = playerName;
+
+          if (playerId) setOwnId(playerId);
+
+          trackSignGameFinish(score, playerName);
+
+          await getLeaderboard().then(setLeaders);
+        }
       }
 
       isInstance = false;
