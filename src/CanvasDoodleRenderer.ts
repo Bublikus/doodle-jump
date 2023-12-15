@@ -73,7 +73,13 @@ export class CanvasDoodleRenderer {
 
     if (acceleration < 0) {
       this.ctx.save(); // save the current state
-      this.ctx.scale(-1, 1); // flip context horizontally
+      this.ctx.translate(
+        -this.getCanvasX(player.size.width / 2),
+        -this.getCanvasY(
+          ((player.size.width / playerAspectRatio) * this.canvasRatio) / 2
+        )
+      );
+      this.ctx.scale(-1.1, 1.1); // flip context horizontally
       this.ctx.drawImage(
         playerImage,
         -this.getCanvasX(player.position.x) -
@@ -86,6 +92,14 @@ export class CanvasDoodleRenderer {
       );
       this.ctx.restore(); // restore previous state
     } else {
+      this.ctx.save(); // save the current state
+      this.ctx.translate(
+        -this.getCanvasX(player.size.width / 2),
+        -this.getCanvasY(
+          ((player.size.width / playerAspectRatio) * this.canvasRatio) / 2
+        )
+      );
+      this.ctx.scale(1.1, 1.1); // flip context horizontally
       this.ctx.drawImage(
         playerImage,
         this.getCanvasX(player.position.x),
@@ -95,6 +109,7 @@ export class CanvasDoodleRenderer {
           (player.size.width / playerAspectRatio) * this.canvasRatio
         )
       );
+      this.ctx.restore(); // restore previous state
     }
   }
 

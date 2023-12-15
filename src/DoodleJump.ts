@@ -49,8 +49,8 @@ export class DoodleJump {
 
   constructor(config: Config) {
     this.config = {
-      gravity: 1,
-      jumpHeight: 0.8,
+      gravity: 1.6,
+      jumpHeight: 1,
       ...config,
     };
     this.renderer = this.config.renderer;
