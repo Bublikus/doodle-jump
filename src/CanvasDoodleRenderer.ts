@@ -42,7 +42,7 @@ export class CanvasDoodleRenderer {
     return y * this.canvas.height;
   }
 
-  public update({ player, platforms }: RenderData): void {
+  public update({ player, platforms, acceleration }: RenderData): void {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -70,15 +70,32 @@ export class CanvasDoodleRenderer {
     const playerImage = imagesMap.get(doodleRightImg)!;
     // @ts-ignore
     const playerAspectRatio = playerImage.width / playerImage.height;
-    this.ctx.drawImage(
-      playerImage,
-      this.getCanvasX(player.position.x),
-      this.getCanvasY(player.position.y),
-      this.getCanvasX(player.size.width),
-      this.getCanvasY(
-        (player.size.width / playerAspectRatio) * this.canvasRatio
-      )
-    );
+
+    if (acceleration < 0) {
+      this.ctx.save(); // save the current state
+      this.ctx.scale(-1, 1); // flip context horizontally
+      this.ctx.drawImage(
+        playerImage,
+        -this.getCanvasX(player.position.x) -
+          this.getCanvasX(player.size.width), // posX needs to be inverted too
+        this.getCanvasY(player.position.y),
+        this.getCanvasX(player.size.width),
+        this.getCanvasY(
+          (player.size.width / playerAspectRatio) * this.canvasRatio
+        )
+      );
+      this.ctx.restore(); // restore previous state
+    } else {
+      this.ctx.drawImage(
+        playerImage,
+        this.getCanvasX(player.position.x),
+        this.getCanvasY(player.position.y),
+        this.getCanvasX(player.size.width),
+        this.getCanvasY(
+          (player.size.width / playerAspectRatio) * this.canvasRatio
+        )
+      );
+    }
   }
 
   public destroy() {

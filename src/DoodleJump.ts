@@ -286,6 +286,7 @@ export class DoodleJump {
       player: this.player,
       platforms: this.platforms,
       score: this.score,
+      acceleration: this.acceleration,
       isGameOver: this.isGameOver,
     });
   }
