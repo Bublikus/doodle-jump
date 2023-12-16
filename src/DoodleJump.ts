@@ -29,8 +29,8 @@ export class DoodleJump {
     size: { width: 0.1, height: 0.1 },
   };
   private acceleration: number = 0;
-  private accelerationFactor: number = 0.7 * (isTouch ? 2 : 1);
-  private accelerationMax: number = 5 * (isTouch ? 2 : 1);
+  private accelerationFactor: number = 0.7 * (isTouch ? 1.5 : 1);
+  private accelerationMax: number = 5 * (isTouch ? 1.5 : 1);
   private platforms: Platform[] = [];
   private platformHeight: number = 0.04;
   private platformWidth: number = 0.14;
