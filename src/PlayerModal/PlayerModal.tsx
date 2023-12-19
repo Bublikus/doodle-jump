@@ -38,9 +38,12 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   useEffect(() => {
     if (open) {
       setTimeout(() => {
+        inputRef.current?.setAttribute("autofocus", "autofocus");
         inputRef.current?.focus();
         inputRef.current?.select();
       }, 100);
+    } else {
+      inputRef.current?.removeAttribute("autofocus");
     }
   }, [open]);
 
@@ -56,7 +59,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       closeOnOverlayClick={false}
     >
       <form onSubmit={handleSubmit} className="player-modal__form">
-        <h2 className="player-modal__score">Score: 🚀${score}</h2>
+        <h2 className="player-modal__score">Score: 🚀{score}</h2>
         <h2 className="player-modal__name-title">👤Enter your name:</h2>
 
         <input
