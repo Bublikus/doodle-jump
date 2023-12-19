@@ -15,3 +15,7 @@
 .player-modal__name-title {
     padding: 0;
 }
+
+.player-modal__input {
+    font-size: 18px;
+}
