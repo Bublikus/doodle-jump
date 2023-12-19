@@ -1,0 +1,17 @@
+.react-responsive-modal-modal {
+  border-radius: 12px;
+}
+
+.player-modal__form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.player-modal__footer,
+.player-modal__score,
+.player-modal__name-title {
+    padding: 0;
+}

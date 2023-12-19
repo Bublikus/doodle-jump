@@ -80,10 +80,6 @@ header h3 {
 }
 /* base containers */
 
-* {
-  user-select: none;
-}
-
 html,
 body {
   overflow: hidden;
@@ -123,6 +119,10 @@ main {
 
 main.loading {
   opacity: 0;
+}
+
+main * {
+  user-select: none;
 }
 
 footer {

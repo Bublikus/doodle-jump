@@ -9,6 +9,7 @@ import {
   trackSignGameFinish,
 } from "./firebase";
 import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
+import { PlayerModal } from "./PlayerModal";
 import bgImg from "./assets/bg.jpg";
 import swipeImg from "./assets/swipe-horizontal.png";
 import tapImg from "./assets/tap.png";
@@ -16,15 +17,13 @@ import "./style.css";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
-let isInstance = false;
-
 export const App: FC = () => {
   const doodleJumpRef = useRef<DoodleJump>();
   const doodleJumpRendererRef = useRef<CanvasDoodleRenderer>();
   const gameContainerRef = useRef<HTMLCanvasElement>(null);
+  const isOverlay = useRef(false);
 
-  const defaultName = useRef(localStorage.getItem("playerName"));
-
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -33,29 +32,27 @@ export const App: FC = () => {
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
+  isOverlay.current = isShownLeaderboard || isShownInstructions;
+
   const sortedLeaders = leaders.sort((a, b) => b.score - a.score).slice(0, 10);
 
   const restart = () => {
     const gameContainer = gameContainerRef.current;
+    if (!gameContainer) return;
 
-    if (!isInstance && gameContainer) {
-      doodleJumpRendererRef.current =
-        doodleJumpRendererRef.current ||
-        new CanvasDoodleRenderer(gameContainer);
+    doodleJumpRendererRef.current =
+      doodleJumpRendererRef.current || new CanvasDoodleRenderer(gameContainer);
 
-      doodleJumpRef.current =
-        doodleJumpRef.current ||
-        new DoodleJump({
-          renderer: (data) => {
-            doodleJumpRendererRef.current?.update(data);
-            setScore(data.score);
-            setIsGameOver(data.isGameOver);
-          },
-        });
-      doodleJumpRef.current.start();
-
-      isInstance = true;
-    }
+    doodleJumpRef.current =
+      doodleJumpRef.current ||
+      new DoodleJump({
+        renderer: (data) => {
+          doodleJumpRendererRef.current?.update(data);
+          setScore(data.score);
+          setIsGameOver(data.isGameOver);
+        },
+      });
+    doodleJumpRef.current.start();
   };
 
   const handleRestart = () => {
@@ -66,49 +63,26 @@ export const App: FC = () => {
     restart();
   };
 
+  const onPlayerModalClose = async (playerName: string) => {
+    setShowPlayerModal(false);
+
+    if (score && playerName) {
+      const playerId = await addPayerToLeaderboard(playerName, score);
+      if (playerId) setOwnId(playerId);
+      trackSignGameFinish(score, playerName);
+      await getLeaderboard().then(setLeaders);
+    }
+  };
+
   useEffect(() => {
     const endGame = async () => {
+      trackGameFinish(score);
       setIsShownLeaderboard(true);
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (score) {
-        trackGameFinish(score);
+      if (score) setShowPlayerModal(true);
 
-        const promptPlayer = () => {
-          let playerName;
-
-          while (true) {
-            const player = prompt(
-              `Score: 🚀${score}\n👤Enter your name: `,
-              defaultName.current ?? undefined
-            );
-
-            playerName = player?.trim().slice(0, 50);
-
-            if (playerName !== null && playerName !== "") break;
-          }
-
-          return playerName;
-        };
-
-        const playerName = promptPlayer();
-
-        if (playerName) {
-          const playerId = await addPayerToLeaderboard(playerName, score);
-
-          localStorage.setItem("playerName", playerName);
-          defaultName.current = playerName;
-
-          if (playerId) setOwnId(playerId);
-
-          trackSignGameFinish(score, playerName);
-
-          await getLeaderboard().then(setLeaders);
-        }
-      }
-
-      isInstance = false;
       doodleJumpRef.current?.destroy();
     };
 
@@ -124,10 +98,10 @@ export const App: FC = () => {
   }, []);
 
   useEffect(() => {
-    const checkSelectionInterval = setInterval(
-      () => window.getSelection()?.removeAllRanges?.(),
-      20
-    );
+    const checkSelectionInterval = setInterval(() => {
+      if (isOverlay.current) return;
+      window.getSelection()?.removeAllRanges?.();
+    }, 20);
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
@@ -258,6 +232,12 @@ export const App: FC = () => {
           </strong>
         </footer>
       </main>
+
+      <PlayerModal
+        open={showPlayerModal}
+        score={score}
+        onClose={onPlayerModalClose}
+      />
     </>
   );
 };
