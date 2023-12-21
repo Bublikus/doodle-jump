@@ -128,7 +128,10 @@ export class DoodleJump {
 
     for (let i = 0; i < this.platformsPerScreen; i++) {
       let x = Math.random() * xRange;
-      const y = i / this.platformsPerScreen;
+      let y = i / this.platformsPerScreen;
+
+      // shift down
+      y += this.platformHeight;
 
       // Make sure the first platform is always in the middle
       if (i === this.platformsPerScreen - 1) {
