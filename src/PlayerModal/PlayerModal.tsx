@@ -36,15 +36,10 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   };
 
   useEffect(() => {
-    if (open) {
-      setTimeout(() => {
-        inputRef.current?.setAttribute("autofocus", "autofocus");
-        inputRef.current?.focus();
-        inputRef.current?.select();
-      }, 100);
-    } else {
-      inputRef.current?.removeAttribute("autofocus");
-    }
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 100);
   }, [open]);
 
   return (
@@ -59,22 +54,30 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       closeOnOverlayClick={false}
     >
       <form onSubmit={handleSubmit} className="player-modal__form">
-        <h2 className="player-modal__score">Score: 🚀{score}</h2>
-        <h2 className="player-modal__name-title">👤Enter your name:</h2>
+        <div className="player-modal__form-section">
+          <h2 className="player-modal__score-title">🚀Score</h2>
+          <h3 className="player-modal__score">{score}</h3>
+        </div>
 
-        <input
-          ref={inputRef}
-          type="text"
-          id="firstName"
-          name="firstName"
-          autoComplete="firstName"
-          value={name}
-          className="player-modal__input"
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div className="player-modal__form-section">
+          <h2 className="player-modal__name-title">👤Enter your name:</h2>
+          <input
+            ref={inputRef}
+            type="text"
+            id="firstName"
+            name="firstName"
+            autoFocus
+            autoComplete="firstName"
+            value={name}
+            className="player-modal__input"
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
 
         <footer className="player-modal__footer">
-          <button type="submit">Save</button>
+          <button type="submit" className="player-modal__footer-button">
+            Save
+          </button>
         </footer>
       </form>
     </Modal>
