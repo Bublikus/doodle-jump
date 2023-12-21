@@ -36,8 +36,11 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   };
 
   useEffect(() => {
-    inputRef.current?.setAttribute("autofocus", "autofocus");
-    inputRef.current?.focus();
+    if (!open) return;
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 500);
   }, [open]);
 
   return (
@@ -64,6 +67,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
             type="text"
             id="firstName"
             name="firstName"
+            autoFocus
             autoComplete="firstName"
             value={name}
             className="player-modal__input"
