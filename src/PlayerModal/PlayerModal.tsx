@@ -36,10 +36,39 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }, 100);
+    function focusAndOpenKeyboard(
+      el: HTMLInputElement | null,
+      timeout?: number
+    ) {
+      if (!timeout) {
+        timeout = 500;
+      }
+      if (el) {
+        // Align temp input element approximately where the input element is
+        // so the cursor doesn't jump around
+        var __tempEl__ = document.createElement("input");
+        __tempEl__.style.position = "absolute";
+        __tempEl__.style.top = el.offsetTop + 7 + "px";
+        __tempEl__.style.left = el.offsetLeft + "px";
+        __tempEl__.style.height = 0 + "px";
+        __tempEl__.style.opacity = 0 + "px";
+        // Put this temp element as a child of the page <body> and focus on it
+        document.body.appendChild(__tempEl__);
+        __tempEl__.focus();
+        __tempEl__.select();
+
+        // The keyboard is open. Now do a delayed focus on the target element
+        setTimeout(function () {
+          el.focus();
+          el.click();
+          el.select();
+          // Remove the temp element
+          document.body.removeChild(__tempEl__);
+        }, timeout);
+      }
+    }
+
+    focusAndOpenKeyboard(inputRef.current);
   }, [open]);
 
   return (
