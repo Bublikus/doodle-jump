@@ -17,6 +17,13 @@ import "./style.css";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
+const defaultPlayer: Leader = {
+  id: "",
+  player: `doodler_${Math.floor(new Date().getTime() / 1000)}`,
+  score: 0,
+  date: new Date().toLocaleString(),
+};
+
 export const App: FC = () => {
   const doodleJumpRef = useRef<DoodleJump>();
   const doodleJumpRendererRef = useRef<CanvasDoodleRenderer>();
@@ -28,7 +35,7 @@ export const App: FC = () => {
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [leaders, setLeaders] = useState<Leader[]>([]);
-  const [ownId, setOwnId] = useState("");
+  const [player, setPlayer] = useState<Leader>(defaultPlayer);
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
@@ -58,7 +65,7 @@ export const App: FC = () => {
   const handleRestart = () => {
     setIsShownLeaderboard(false);
     setIsShownInstructions(false);
-    setOwnId("");
+    setPlayer(defaultPlayer);
     trackGameRestart();
     restart();
   };
@@ -68,7 +75,9 @@ export const App: FC = () => {
 
     if (score && playerName) {
       const playerId = await addPayerToLeaderboard(playerName, score);
-      if (playerId) setOwnId(playerId);
+      if (playerId) {
+        setPlayer((prev) => ({ ...prev, id: playerId }));
+      }
       trackSignGameFinish(score, playerName);
       await getLeaderboard().then(setLeaders);
     }
@@ -196,17 +205,17 @@ export const App: FC = () => {
                   {sortedLeaders.map((leader, i) => (
                     <tr
                       key={leader.id}
-                      className={leader.id === ownId ? "strong" : ""}
+                      className={leader.id === player.id ? "strong" : ""}
                     >
                       <td>
-                        <span>{leader.id === ownId ? "→ " : ""}</span>
+                        <span>{leader.id === player.id ? "→ " : ""}</span>
                         <span>{i + 1}</span>
                         <span>
                           {getPrize(i) || <span className="invisible">🥉</span>}
                         </span>
                       </td>
                       <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
-                      <td>🚀{leader.score}</td>
+                      <td>{leader.score}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -236,6 +245,7 @@ export const App: FC = () => {
       <PlayerModal
         open={showPlayerModal}
         score={score}
+        defaultName={defaultPlayer.player}
         onClose={onPlayerModalClose}
       />
     </>

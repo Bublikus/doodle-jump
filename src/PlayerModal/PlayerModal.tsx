@@ -6,31 +6,39 @@ import "./styles.css";
 interface PlayerModalProps {
   open: boolean;
   score: number;
+  defaultName?: string;
   onClose(name: string): void;
 }
 
 export const PlayerModal: React.FC<PlayerModalProps> = ({
   open,
   score,
+  defaultName: defaultPlayerName = `player_${Math.floor(
+    new Date().getTime() / 1000
+  )}`,
   onClose,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const defaultName = useRef(localStorage.getItem("playerName"));
+  const defaultStorageName = useRef(localStorage.getItem("playerName") || "");
+  const defaultName = useRef(defaultStorageName.current || defaultPlayerName);
 
-  const [name, setName] = useState(defaultName.current || "");
+  const [name, setName] = useState(defaultStorageName.current);
 
   const handleSubmit: React.FormEventHandler = (e) => {
     e.preventDefault();
 
-    if (!name.trim()) {
+    if (name && !name.trim()) {
       inputRef.current?.focus();
       inputRef.current?.select();
       return;
     }
 
-    const playerName = name.trim().slice(0, 50);
+    const playerName = name.trim().slice(0, 50) || defaultName.current;
     localStorage.setItem("playerName", playerName);
+
     defaultName.current = playerName;
+    defaultStorageName.current = playerName;
+    setName(playerName);
 
     onClose(playerName);
   };
@@ -39,14 +47,13 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     if (!open) return;
     setTimeout(() => {
       inputRef.current?.focus();
-      inputRef.current?.select();
     }, 500);
   }, [open]);
 
   return (
     <Modal
       open={open}
-      onClose={() => onClose("")}
+      onClose={() => onClose(defaultName.current)}
       center
       blockScroll
       closeOnEsc
@@ -56,18 +63,19 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="player-modal__form">
         <div className="player-modal__form-section">
-          <h2 className="player-modal__score-title">🚀Score</h2>
+          <h2 className="player-modal__score-title">Score</h2>
           <h3 className="player-modal__score">{score}</h3>
         </div>
 
         <div className="player-modal__form-section">
-          <h2 className="player-modal__name-title">👤Enter your name:</h2>
+          <h2 className="player-modal__name-title">Enter your name</h2>
           <input
             ref={inputRef}
             type="text"
             id="firstName"
             name="firstName"
             autoFocus
+            placeholder={defaultName.current}
             autoComplete="firstName"
             value={name}
             className="player-modal__input"

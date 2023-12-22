@@ -55,7 +55,7 @@ export async function addPayerToLeaderboard(player: string, score: number) {
     const docRef = await addDoc(collection(db, "leaderboard"), {
       player,
       score,
-      date: new Date().toISOString(),
+      date: new Date().toLocaleString(),
     });
     return docRef.id;
   } catch (error) {
