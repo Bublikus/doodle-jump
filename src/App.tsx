@@ -9,14 +9,13 @@ import {
   trackSignGameFinish,
 } from "./firebase";
 import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
-import { PlayerModal } from "./PlayerModal";
-import { Leaderboard } from "./Leaderboard";
+import { PlayerModal } from "./components/PlayerModal";
+import { Leaderboard } from "./components/Leaderboard";
+import { Instructions } from "./components/Instructions";
+import { GameContainer } from "./components/GameContainer";
 import { useBlockGestures } from "./useBlockGestures";
 import { useVisibilityChange } from "./useVisibilityChange";
 import { useRemoveSelection } from "./useRemoveSelection";
-import bgImg from "./assets/bg.jpg";
-import swipeImg from "./assets/swipe-horizontal.png";
-import tapImg from "./assets/tap.png";
 import "./style.css";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
@@ -35,7 +34,6 @@ export const App: FC = () => {
   const isOverlay = useRef(false);
 
   const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [leaders, setLeaders] = useState<Leader[]>([]);
@@ -100,10 +98,7 @@ export const App: FC = () => {
   }, [isGameOver]);
 
   useEffect(() => {
-    if (!loading && !isShownInstructions) restart();
-  }, [loading]);
-
-  useEffect(() => {
+    restart();
     getLeaderboard().then(setLeaders);
   }, []);
 
@@ -114,70 +109,39 @@ export const App: FC = () => {
   useBlockGestures();
 
   return (
-    <>
-      {loading && <p className="loading">loading...</p>}
-      <main className={loading ? "loading" : ""}>
-        <img
-          className="bg"
-          src={bgImg}
-          alt="bg"
-          onLoad={() => setLoading(false)}
-        />
+    <GameContainer>
+      <Instructions open={isShownInstructions} onClose={handleRestart} />
 
-        {isShownInstructions && (
-          <div role="button" className="instruction" onClick={handleRestart}>
-            <h2>How to play</h2>
+      <header>
+        <h1>Double Jump Game</h1>
+        <h3>Score: {score}</h3>
+      </header>
 
-            <div className="instruction__images">
-              <div className="instruction__image">
-                <span className="instruction__image-title">
-                  Swipe{"\n"}to{"\n"}move
-                </span>
-                <img src={swipeImg} alt="swipe" />
-              </div>
-              <div className="instruction__image">
-                <span className="instruction__image-title">
-                  Tap{"\n"}to{"\n"}pause
-                </span>
-                <img src={tapImg} alt="tap" />
-              </div>
+      <canvas ref={gameContainerRef} className="game-container" />
+
+      <Leaderboard
+        open={isShownLeaderboard}
+        player={player}
+        leaders={leaders}
+        onClose={handleRestart}
+      />
+
+      <footer>
+        <strong className="help">
+          <div>
+            <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
+            <div>
+              <div>← → &thinsp;&thinsp; Move</div>
             </div>
-
-            <h2>Tap to start</h2>
           </div>
-        )}
-
-        <header>
-          <h1>Double Jump Game</h1>
-          <h3>Score: {score}</h3>
-        </header>
-
-        <canvas ref={gameContainerRef} className="game-container" />
-
-        <Leaderboard
-          open={isShownLeaderboard}
-          player={player}
-          leaders={leaders}
-          onClose={handleRestart}
-        />
-
-        <footer>
-          <strong className="help">
+          <div>
+            <span>{isTouch ? "Tap" : "Space"} &nbsp;</span>
             <div>
-              <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
-              <div>
-                <div>← → &thinsp;&thinsp; Move</div>
-              </div>
+              <div>- Pause</div>
             </div>
-            <div>
-              <span>{isTouch ? "Tap" : "Space"} &nbsp;</span>
-              <div>
-                <div>- Pause</div>
-              </div>
-            </div>
-          </strong>
-        </footer>
-      </main>
+          </div>
+        </strong>
+      </footer>
 
       <PlayerModal
         open={showPlayerModal}
@@ -185,6 +149,6 @@ export const App: FC = () => {
         defaultName={defaultPlayer.player}
         onClose={onPlayerModalClose}
       />
-    </>
+    </GameContainer>
   );
 };

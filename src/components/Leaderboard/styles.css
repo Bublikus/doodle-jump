@@ -62,3 +62,9 @@
 .leaderboard thead th {
   padding-bottom: 10px;
 }
+
+@media screen and (max-width: 374px) {
+  .leaderboard td {
+    font-size: 14px;
+  }
+}
