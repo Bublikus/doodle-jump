@@ -11,6 +11,7 @@ import {
 import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
 import { PlayerModal } from "./PlayerModal";
 import { Leaderboard } from "./Leaderboard";
+import { useBlockGestures } from "./useBlockGestures";
 import bgImg from "./assets/bg.jpg";
 import swipeImg from "./assets/swipe-horizontal.png";
 import tapImg from "./assets/tap.png";
@@ -117,23 +118,12 @@ export const App: FC = () => {
       }
     });
 
-    const blockGestures = (e: Event) => {
-      e.preventDefault();
-      (document.body.style as any).zoom = 1;
-    };
-
-    document.addEventListener("gesturestart", blockGestures);
-    document.addEventListener("gesturechange", blockGestures);
-    document.addEventListener("gestureend", blockGestures);
-
     return () => {
-      document.removeEventListener("gesturestart", blockGestures);
-      document.removeEventListener("gesturechange", blockGestures);
-      document.removeEventListener("gestureend", blockGestures);
-
       clearInterval(checkSelectionInterval);
     };
   }, []);
+
+  useBlockGestures();
 
   return (
     <>
