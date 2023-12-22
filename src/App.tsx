@@ -13,9 +13,9 @@ import { PlayerModal } from "./components/PlayerModal";
 import { Leaderboard } from "./components/Leaderboard";
 import { Instructions } from "./components/Instructions";
 import { GameContainer } from "./components/GameContainer";
-import { useBlockGestures } from "./useBlockGestures";
-import { useVisibilityChange } from "./useVisibilityChange";
-import { useRemoveSelection } from "./useRemoveSelection";
+import { useBlockGestures } from "./hooks/useBlockGestures";
+import { useVisibilityChange } from "./hooks/useVisibilityChange";
+import { useRemoveSelection } from "./hooks/useRemoveSelection";
 import "./style.css";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
