@@ -12,11 +12,12 @@ import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
 import { PlayerModal } from "./PlayerModal";
 import { Leaderboard } from "./Leaderboard";
 import { useBlockGestures } from "./useBlockGestures";
+import { useVisibilityChange } from "./useVisibilityChange";
+import { useRemoveSelection } from "./useRemoveSelection";
 import bgImg from "./assets/bg.jpg";
 import swipeImg from "./assets/swipe-horizontal.png";
 import tapImg from "./assets/tap.png";
 import "./style.css";
-import { useVisibilityChange } from "./useVisibilityChange";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
@@ -107,17 +108,7 @@ export const App: FC = () => {
     getLeaderboard().then(setLeaders);
   }, []);
 
-  useEffect(() => {
-    const checkSelectionInterval = setInterval(() => {
-      if (isOverlay.current) return;
-      window.getSelection()?.removeAllRanges?.();
-    }, 20);
-
-    return () => {
-      clearInterval(checkSelectionInterval);
-    };
-  }, []);
-
+  useRemoveSelection(!isOverlay.current);
   useVisibilityChange(
     (isVisible) => !isVisible && doodleJumpRef.current?.pause()
   );
