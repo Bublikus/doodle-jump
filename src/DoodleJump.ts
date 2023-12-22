@@ -1,4 +1,4 @@
-import { InputHandler } from "./InputHandler";
+import { InputHandler } from "./handkers/InputHandler";
 import { RenderData } from "./types";
 
 const isTouch = Boolean("ontouchstart" in window || navigator.maxTouchPoints);
