@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Leader } from "../../firebase";
 import "./styles.css";
 
 interface LeaderboardProps {
   open: boolean;
+  active: boolean;
   player: Leader;
   leaders: Leader[];
   onClose(): void;
@@ -11,10 +12,14 @@ interface LeaderboardProps {
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   open,
+  active,
   player,
   leaders,
   onClose,
 }) => {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   const sortedLeaders = leaders.sort((a, b) => b.score - a.score).slice(0, 10);
 
   const getPrize = (i: number) => {
@@ -28,6 +33,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
       return "";
     }
   };
+
+  useEffect(() => {
+    const handleEscClose = (e: KeyboardEvent) => {
+      if (["Escape", "Enter", "Space"].includes(e.code)) onCloseRef.current();
+    };
+
+    if (open && active) {
+      window.addEventListener("keydown", handleEscClose);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleEscClose);
+    };
+  }, [open, active]);
 
   return !open ? null : (
     <div role="button" className="leaderboard" onClick={onClose}>

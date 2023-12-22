@@ -121,6 +121,7 @@ export const App: FC = () => {
 
       <Leaderboard
         open={isShownLeaderboard}
+        active={!isShownInstructions && !showPlayerModal}
         player={player}
         leaders={leaders}
         onClose={handleRestart}
