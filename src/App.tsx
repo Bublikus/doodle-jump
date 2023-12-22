@@ -16,6 +16,7 @@ import bgImg from "./assets/bg.jpg";
 import swipeImg from "./assets/swipe-horizontal.png";
 import tapImg from "./assets/tap.png";
 import "./style.css";
+import { useVisibilityChange } from "./useVisibilityChange";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
@@ -112,17 +113,14 @@ export const App: FC = () => {
       window.getSelection()?.removeAllRanges?.();
     }, 20);
 
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        doodleJumpRef.current?.pause();
-      }
-    });
-
     return () => {
       clearInterval(checkSelectionInterval);
     };
   }, []);
 
+  useVisibilityChange(
+    (isVisible) => !isVisible && doodleJumpRef.current?.pause()
+  );
   useBlockGestures();
 
   return (
