@@ -1,5 +1,6 @@
 import React from "react";
 import { Leader } from "../firebase";
+import "./styles.css";
 
 interface LeaderboardProps {
   open: boolean;
