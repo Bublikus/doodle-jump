@@ -49,18 +49,17 @@ export const App: FC = () => {
     const gameContainer = gameContainerRef.current;
     if (!gameContainer) return;
 
-    doodleJumpRendererRef.current =
-      doodleJumpRendererRef.current || new CanvasDoodleRenderer(gameContainer);
+    doodleJumpRendererRef.current?.destroy();
+    doodleJumpRendererRef.current = new CanvasDoodleRenderer(gameContainer);
 
-    doodleJumpRef.current =
-      doodleJumpRef.current ||
-      new DoodleJump({
-        renderer: (data) => {
-          doodleJumpRendererRef.current?.update(data);
-          setScore(data.score);
-          setIsGameOver(data.isGameOver);
-        },
-      });
+    doodleJumpRef.current?.destroy();
+    doodleJumpRef.current = new DoodleJump({
+      renderer: (data) => {
+        doodleJumpRendererRef.current?.update(data);
+        setScore(data.score);
+        setIsGameOver(data.isGameOver);
+      },
+    });
     doodleJumpRef.current.start();
   };
 
