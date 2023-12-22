@@ -10,6 +10,7 @@ import {
 } from "./firebase";
 import { CanvasDoodleRenderer } from "./CanvasDoodleRenderer";
 import { PlayerModal } from "./PlayerModal";
+import { Leaderboard } from "./Leaderboard";
 import bgImg from "./assets/bg.jpg";
 import swipeImg from "./assets/swipe-horizontal.png";
 import tapImg from "./assets/tap.png";
@@ -40,8 +41,6 @@ export const App: FC = () => {
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
   isOverlay.current = isShownLeaderboard || isShownInstructions;
-
-  const sortedLeaders = leaders.sort((a, b) => b.score - a.score).slice(0, 10);
 
   const restart = () => {
     const gameContainer = gameContainerRef.current;
@@ -136,18 +135,6 @@ export const App: FC = () => {
     };
   }, []);
 
-  const getPrize = (i: number) => {
-    if (i === 0) {
-      return "🥇";
-    } else if (i === 1) {
-      return "🥈";
-    } else if (i === 2) {
-      return "🥉";
-    } else {
-      return "";
-    }
-  };
-
   return (
     <>
       {loading && <p className="loading">loading...</p>}
@@ -184,45 +171,17 @@ export const App: FC = () => {
 
         <header>
           <h1>Double Jump Game</h1>
-          <h3>Score: 🚀{score}</h3>
+          <h3>Score: {score}</h3>
         </header>
 
         <canvas ref={gameContainerRef} className="game-container" />
 
-        {isShownLeaderboard && (
-          <div role="button" className="leaderboard" onClick={handleRestart}>
-            <div className="leaderboard-box">
-              <h3>Leaderboard</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedLeaders.map((leader, i) => (
-                    <tr
-                      key={leader.id}
-                      className={leader.id === player.id ? "strong" : ""}
-                    >
-                      <td>
-                        <span>{leader.id === player.id ? "→ " : ""}</span>
-                        <span>{i + 1}</span>
-                        <span>
-                          {getPrize(i) || <span className="invisible">🥉</span>}
-                        </span>
-                      </td>
-                      <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
-                      <td>{leader.score}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <Leaderboard
+          open={isShownLeaderboard}
+          player={player}
+          leaders={leaders}
+          onClose={handleRestart}
+        />
 
         <footer>
           <strong className="help">
