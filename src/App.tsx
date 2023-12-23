@@ -97,6 +97,9 @@ export const App: FC = () => {
     };
 
     if (isGameOver) endGame();
+
+    // disable exhaustive-deps to avoid accidentally call endGame() twice
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isGameOver]);
 
   useEffect(() => {
