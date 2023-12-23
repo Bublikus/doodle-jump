@@ -22,7 +22,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   const defaultStorageName = useRef(localStorage.getItem("playerName") || "");
   const defaultName = useRef(defaultStorageName.current || defaultPlayerName);
 
-  const [name, setName] = useState(defaultStorageName.current);
+  const [name, setName] = useState("");
 
   const handleSubmit: React.FormEventHandler = (e) => {
     e.preventDefault();
@@ -38,7 +38,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
 
     defaultName.current = playerName;
     defaultStorageName.current = playerName;
-    setName(playerName);
+    setName("");
 
     onClose(playerName);
   };
