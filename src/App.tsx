@@ -104,7 +104,9 @@ export const App: FC = () => {
   }, []);
 
   useRemoveSelection(!isOverlay.current);
-  useVisibilityChange((visible) => !visible && doodleJumpRef.current?.pause());
+  useVisibilityChange((visible) =>
+    visible ? doodleJumpRef.current?.play() : doodleJumpRef.current?.pause()
+  );
   useBlockGestures();
 
   return (
