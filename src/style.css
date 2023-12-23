@@ -44,7 +44,7 @@ header {
   justify-content: center;
   align-self: stretch;
   text-align: center;
-  padding-bottom: 20px;
+  padding-bottom: 30px;
 }
 
 h1,
@@ -198,7 +198,7 @@ footer {
   }
 
   header {
-    padding-bottom: 10px;
+    padding-bottom: 20px;
   }
 
   header h1 {
@@ -216,8 +216,8 @@ footer {
   }
 
   footer {
-    padding-top: 10px;
-    padding-bottom: 0;
+    padding-top: 30px;
+    padding-bottom: 10px;
   }
 
   footer h4 {
