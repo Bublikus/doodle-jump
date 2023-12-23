@@ -76,9 +76,7 @@ export const App: FC = () => {
 
     if (score && playerName) {
       const playerId = await addPayerToLeaderboard(playerName, score);
-      if (playerId) {
-        setPlayer((prev) => ({ ...prev, id: playerId }));
-      }
+      if (playerId) setPlayer((prev) => ({ ...prev, id: playerId }));
       trackSignGameFinish(score, playerName);
       await getLeaderboard().then(setLeaders);
     }
@@ -92,12 +90,10 @@ export const App: FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (score) setShowPlayerModal(true);
-
       doodleJumpRef.current?.destroy();
     };
 
     if (isGameOver) endGame();
-
     // disable exhaustive-deps to avoid accidentally call endGame() twice
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isGameOver]);
@@ -108,9 +104,7 @@ export const App: FC = () => {
   }, []);
 
   useRemoveSelection(!isOverlay.current);
-  useVisibilityChange(
-    (isVisible) => !isVisible && doodleJumpRef.current?.pause()
-  );
+  useVisibilityChange((visible) => !visible && doodleJumpRef.current?.pause());
   useBlockGestures();
 
   return (
