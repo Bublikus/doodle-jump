@@ -45,9 +45,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
 
   useEffect(() => {
     if (!open) return;
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 500);
+    inputRef.current?.focus();
   }, [open]);
 
   return (
