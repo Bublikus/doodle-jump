@@ -114,7 +114,9 @@ export const App: FC = () => {
       <Instructions open={isShownInstructions} onClose={handleRestart} />
 
       <header>
-        <h1>Double Jump Game</h1>
+        <h1 className={`${score > 0 ? "invisible-slide" : ""}`}>
+          Double Jump Game
+        </h1>
         <h3>Score: {score}</h3>
       </header>
 
@@ -129,12 +131,9 @@ export const App: FC = () => {
       />
 
       <footer>
-        <strong className="help">
+        <strong className={`help ${score > 0 ? "invisible-slide" : ""}`}>
           <div>
-            <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
-            <div>
-              <div>← → &thinsp;&thinsp; Move</div>
-            </div>
+            ← <span>&nbsp; {isTouch ? "Swipe" : "Arrows"} &nbsp;</span> →
           </div>
         </strong>
       </footer>
