@@ -134,12 +134,6 @@ export const App: FC = () => {
               <div>← → &thinsp;&thinsp; Move</div>
             </div>
           </div>
-          <div>
-            <span>{isTouch ? "Tap" : "Space"} &nbsp;</span>
-            <div>
-              <div>- Pause</div>
-            </div>
-          </div>
         </strong>
       </footer>
 

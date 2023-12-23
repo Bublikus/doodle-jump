@@ -99,10 +99,8 @@ export class DoodleJump {
     this.inputHandler.handleActions({
       ArrowLeft: () => this.movePlayerLeft(),
       ArrowRight: () => this.movePlayerRight(),
-      Space: () => this.pause(),
       swipeLeft: () => this.movePlayerLeft(),
       swipeRight: () => this.movePlayerRight(),
-      tap: () => this.pause(),
     });
   }
 
