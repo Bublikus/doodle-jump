@@ -61,6 +61,7 @@ export class DoodleJump {
     this.bindKeys();
     this.init();
     this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
+    console.log("start");
     return this;
   }
 

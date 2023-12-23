@@ -48,9 +48,11 @@ export const App: FC = () => {
     if (!gameContainer) return;
 
     doodleJumpRendererRef.current?.destroy();
+    doodleJumpRendererRef.current = undefined;
     doodleJumpRendererRef.current = new CanvasDoodleRenderer(gameContainer);
 
     doodleJumpRef.current?.destroy();
+    doodleJumpRef.current = undefined;
     doodleJumpRef.current = new DoodleJump({
       renderer: (data) => {
         doodleJumpRendererRef.current?.update(data);
