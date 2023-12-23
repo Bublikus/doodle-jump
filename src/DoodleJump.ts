@@ -167,8 +167,9 @@ export class DoodleJump {
     this.animationFrameRequest = requestAnimationFrame(this.gameLoop);
 
     // Calculate delta time
+    const maxDelta = 0.1; // For example, 100 milliseconds
     const delta = time - this.lastFrameTime;
-    this.deltaTime = this.lastFrameTime ? delta / 1000 : 0;
+    this.deltaTime = this.lastFrameTime ? Math.min(delta / 1000, maxDelta) : 0;
     this.lastFrameTime = time;
 
     // Don't update game logic if the game is paused or over
