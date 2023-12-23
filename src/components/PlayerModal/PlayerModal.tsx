@@ -55,9 +55,9 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       center
       blockScroll
       closeOnEsc
-      showCloseIcon
+      showCloseIcon={false}
       focusTrapped
-      closeOnOverlayClick={false}
+      closeOnOverlayClick
     >
       <form onSubmit={handleSubmit} className="player-modal__form">
         <div className="player-modal__form-section">
