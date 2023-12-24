@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+// @ts-ignore
 import bgImg from "./bg.jpg";
 
 export const GameContainer: React.FC<{ children: React.ReactNode }> = ({

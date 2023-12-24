@@ -111,7 +111,10 @@ export const App: FC = () => {
 
   return (
     <GameContainer>
-      <Instructions open={isShownInstructions} onClose={handleRestart} />
+      <Instructions
+        open={isShownInstructions}
+        onClose={() => setIsShownInstructions(false)}
+      />
 
       <header>
         <h1 className={`${score > 0 ? "invisible-slide" : ""}`}>

@@ -1,4 +1,5 @@
 import React from "react";
+// @ts-ignore
 import swipeImg from "./swipe-horizontal.png";
 import "./styles.css";
 
