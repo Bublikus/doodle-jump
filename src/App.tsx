@@ -122,14 +122,6 @@ export const App: FC = () => {
 
       <canvas ref={gameContainerRef} className="game-container" />
 
-      <Leaderboard
-        open={isShownLeaderboard}
-        active={!isShownInstructions && !showPlayerModal}
-        player={player}
-        leaders={leaders}
-        onClose={handleRestart}
-      />
-
       <footer>
         <strong className={`help ${score > 0 ? "invisible-slide" : ""}`}>
           <div>
@@ -137,6 +129,14 @@ export const App: FC = () => {
           </div>
         </strong>
       </footer>
+
+      <Leaderboard
+        open={isShownLeaderboard}
+        active={!isShownInstructions && !showPlayerModal}
+        player={player}
+        leaders={leaders}
+        onClose={handleRestart}
+      />
 
       <PlayerModal
         open={showPlayerModal}
