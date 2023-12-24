@@ -33,11 +33,11 @@ export const App: FC = () => {
   const gameContainerRef = useRef<HTMLCanvasElement>(null);
   const isOverlay = useRef(false);
 
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [player, setPlayer] = useState<Leader>(defaultPlayer);
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
