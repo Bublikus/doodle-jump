@@ -26,14 +26,14 @@ export class DoodleJump {
   private game = { width: 1, height: 1 };
   private player: Player = {
     position: { x: 0, y: 0 },
-    size: { width: 0.1, height: 0.1 },
+    size: { width: 0.12, height: 0.12 },
   };
   private acceleration: number = 0;
-  private accelerationFactor: number = 0.7 * (isTouch ? 1.5 : 1);
-  private accelerationMax: number = 5 * (isTouch ? 1.5 : 1);
+  private accelerationFactor: number = 0.8 * (isTouch ? 1.5 : 1);
+  private accelerationMax: number = 7 * (isTouch ? 1.5 : 1);
   private platforms: Platform[] = [];
-  private platformHeight: number = 0.04;
-  private platformWidth: number = 0.14;
+  private platformHeight: number = 0.1;
+  private platformWidth: number = 0.2;
   private animationFrameRequest: number = 0;
   private platformsPerScreen: number = 10;
   private velocity: number = 0;
@@ -121,10 +121,13 @@ export class DoodleJump {
   }
 
   private generateInitialPlatforms() {
-    const xRange = this.game.width - this.platformWidth;
-    let firstPlatformX = this.game.width / 2 - this.platformWidth / 2;
-
     for (let i = 0; i < this.platformsPerScreen; i++) {
+      const { width: platformWidth, height: platformHeight } =
+        this.getPlatformSize();
+
+      const xRange = this.game.width - platformWidth;
+      let firstPlatformX = this.game.width / 2 - platformWidth / 2;
+
       let x = Math.random() * xRange;
       let y = i / this.platformsPerScreen;
 
@@ -138,15 +141,15 @@ export class DoodleJump {
 
       // Make sure the second to 4th platforms are always X away from the first 4 platforms
       if (this.platformsPerScreen - i > 1 && this.platformsPerScreen - i < 5) {
-        const range1 = (x / xRange) * (firstPlatformX - this.platformWidth);
-        const range2 = range1 + (firstPlatformX + this.platformWidth);
+        const range1 = (x / xRange) * (firstPlatformX - platformWidth);
+        const range2 = range1 + (firstPlatformX + platformWidth);
         x = Math.random() > 0.5 ? range1 : range2;
       }
 
       this.platforms.push({
         size: {
-          width: this.platformWidth,
-          height: this.platformHeight,
+          width: platformWidth,
+          height: platformHeight,
         },
         position: { x, y },
         type: "normal",
@@ -252,11 +255,14 @@ export class DoodleJump {
 
     // Add new platforms at the top as needed
     while (this.platforms.length < this.platformsPerScreen) {
-      const x = Math.random() * (this.game.width - this.platformWidth);
-      const y = -this.platformHeight;
+      const { width: platformWidth, height: platformHeight } =
+        this.getPlatformSize();
+
+      const x = Math.random() * (this.game.width - platformWidth);
+      const y = -platformHeight;
 
       this.platforms.push({
-        size: { width: this.platformWidth, height: this.platformHeight },
+        size: { width: platformWidth, height: platformHeight },
         position: { x, y },
         type: "normal",
       });
@@ -268,7 +274,7 @@ export class DoodleJump {
       const isXCollision =
         this.player.position.x + this.player.size.width >=
           platform.position.x &&
-        this.player.position.x <= platform.position.x + this.platformWidth;
+        this.player.position.x <= platform.position.x + platform.size.width;
 
       const isYCollision =
         this.player.position.y + this.player.size.height >=
@@ -281,6 +287,15 @@ export class DoodleJump {
         this.velocity = -this.config.jumpHeight;
       }
     });
+  }
+
+  private getPlatformSize(): Size {
+    const platformWidth =
+      this.platformWidth - Math.random() * (this.platformWidth / 5);
+    const platformHeight =
+      this.platformHeight - Math.random() * (this.platformHeight / 5);
+
+    return { width: platformWidth, height: platformHeight };
   }
 
   private render() {

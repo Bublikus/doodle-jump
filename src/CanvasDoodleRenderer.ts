@@ -79,7 +79,7 @@ export class CanvasDoodleRenderer {
           ((player.size.width / playerAspectRatio) * this.canvasRatio) / 2
         )
       );
-      this.ctx.scale(-1.1, 1.1); // flip context horizontally
+      this.ctx.scale(-1.04, 1.04); // flip context horizontally
       this.ctx.drawImage(
         playerImage,
         -this.getCanvasX(player.position.x) -
@@ -99,7 +99,7 @@ export class CanvasDoodleRenderer {
           ((player.size.width / playerAspectRatio) * this.canvasRatio) / 2
         )
       );
-      this.ctx.scale(1.1, 1.1); // flip context horizontally
+      this.ctx.scale(1.04, 1.04); // flip context horizontally
       this.ctx.drawImage(
         playerImage,
         this.getCanvasX(player.position.x),
