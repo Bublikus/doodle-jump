@@ -1,33 +1,7 @@
 import { InputHandler } from './handlers/InputHandler'
-import { RenderData } from './types'
+import { Config, Platform, PlatformType, Player, RenderData, Renderer, Size } from './types'
 
 const isTouch = Boolean('ontouchstart' in window || navigator.maxTouchPoints)
-
-type Config = {
-  renderer: Renderer
-  gravity?: number
-  jumpHeight?: number
-}
-
-type Coords = { x: number; y: number }
-type Speed = { x: number; y: number }
-type Size = { width: number; height: number }
-type Player = {
-  position: Coords
-  size: Size
-}
-export enum PlatformType {
-  Normal = 'normal',
-  Moving = 'moving',
-  Vanishing = 'vanishing',
-}
-type Platform = {
-  size: Size
-  position: Coords
-  speed: Speed
-  type: PlatformType
-}
-type Renderer = (data: RenderData) => void
 
 export class DoodleJump {
   private game = { width: 1, height: 1 }
@@ -152,6 +126,8 @@ export class DoodleJump {
           width: platformWidth,
           height: platformHeight,
         },
+        collisions: 0,
+        collisionsTime: null,
         position: { x, y },
         speed: { x: 0, y: 0 },
         type: PlatformType.Normal,
@@ -265,11 +241,14 @@ export class DoodleJump {
       const y = -platformHeight
 
       // Randomly determine if the platform is moving
-      const type = Math.random() < 0.4 ? PlatformType.Moving : PlatformType.Normal // 40% chance of being a moving platform
+      const types = [PlatformType.Normal, PlatformType.Moving, PlatformType.Vanishing]
+      const type = types[Math.floor(Math.random() * types.length)]
 
       this.platforms.push({
         size: { width: platformWidth, height: platformHeight },
         position: { x, y },
+        collisions: 0,
+        collisionsTime: null,
         speed: { x: this.platformSpeed, y: 0 },
         type,
       })
@@ -286,9 +265,16 @@ export class DoodleJump {
         this.player.position.y + this.player.size.height >= platform.position.y + platform.size.height / 2 && // small tolerance
         this.player.position.y + this.player.size.height <= platform.position.y + platform.size.height
 
+      const isSolidPlatform = [PlatformType.Normal, PlatformType.Moving].includes(platform.type)
+
       if (isXCollision && isYCollision && this.velocity > 0) {
-        // Collision detected, make the player jump
-        this.velocity = -this.config.jumpHeight
+        platform.collisions++
+        platform.collisionsTime = platform.collisionsTime || Date.now()
+
+        if (isSolidPlatform) {
+          // Collision detected, make the player jump
+          this.velocity = -this.config.jumpHeight
+        }
       }
     })
   }

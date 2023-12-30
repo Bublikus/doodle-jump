@@ -1,19 +1,31 @@
-import { RenderData } from './types'
+import { PlatformType, RenderData } from './types'
 import { CanvasImageLoader } from './CanvasImageLoader'
 import platformNormalImg from './assets/normal-platform.png'
 import platformMovingImg from './assets/moving-platform.png'
+import platformVanishing0Img from './assets/vanishing-platform-0.png'
+import platformVanishing1Img from './assets/vanishing-platform-1.png'
+import platformVanishing2Img from './assets/vanishing-platform-2.png'
+import platformVanishing3Img from './assets/vanishing-platform-3.png'
 import doodleRightImg from './assets/doodle-right.png'
-import { PlatformType } from './DoodleJump'
 
 const imageLoader = new CanvasImageLoader()
-
 const imagesMap = new Map<string, CanvasImageSource>()
+let imagesLoaded = false
 
-imageLoader.loadMultipleImages([platformNormalImg, platformMovingImg, doodleRightImg]).then(() => {
-  imagesMap.set(platformNormalImg, imageLoader.getImage(platformNormalImg)!)
-  imagesMap.set(platformMovingImg, imageLoader.getImage(platformMovingImg)!)
-  imagesMap.set(doodleRightImg, imageLoader.getImage(doodleRightImg)!)
-})
+imageLoader
+  .loadMultipleImages([
+    doodleRightImg,
+    platformNormalImg,
+    platformMovingImg,
+    platformVanishing0Img,
+    platformVanishing1Img,
+    platformVanishing2Img,
+    platformVanishing3Img,
+  ])
+  .then(images => {
+    imagesLoaded = true
+    images.forEach(image => imagesMap.set(image, imageLoader.getImage(image)!))
+  })
 
 export class CanvasDoodleRenderer {
   private canvas: HTMLCanvasElement
@@ -49,8 +61,20 @@ export class CanvasDoodleRenderer {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-    if (!imagesMap.has(doodleRightImg) || !imagesMap.has(platformNormalImg) || !imagesMap.has(platformMovingImg)) {
-      return
+    if (!imagesLoaded) return
+
+    const getVanishingPlatformImage = (collisionsTime: number | null): CanvasImageSource | null => {
+      const platformVanishingImages = [
+        imagesMap.get(platformVanishing0Img)!,
+        imagesMap.get(platformVanishing1Img)!,
+        imagesMap.get(platformVanishing2Img)!,
+        imagesMap.get(platformVanishing3Img)!,
+      ]
+
+      // change the image every 100ms after collisionsTime and return nothing if no more images
+      if (collisionsTime === null) return platformVanishingImages[0]
+      const index = Math.floor((Date.now() - collisionsTime) / 100)
+      return platformVanishingImages[index] || null
     }
 
     // Draw the platforms images
@@ -59,8 +83,11 @@ export class CanvasDoodleRenderer {
         {
           [PlatformType.Normal]: imagesMap.get(platformNormalImg)!,
           [PlatformType.Moving]: imagesMap.get(platformMovingImg)!,
+          [PlatformType.Vanishing]: getVanishingPlatformImage(platform.collisionsTime),
         } as Record<PlatformType, CanvasImageSource>
       )[platform.type]
+
+      if (!platformImage) return
 
       // @ts-ignore
       const platformAspectRatio = platformImage.width / platformImage.height

@@ -8,18 +8,18 @@ export class CanvasImageLoader {
   }
 
   // Load a single image
-  loadSingleImage(src: ImageSrc): Promise<void> {
+  loadSingleImage(src: ImageSrc): Promise<ImageSrc> {
     return new Promise((resolve, reject) => {
       if (this.images.has(src)) {
         // Resolve immediately if the image is already loaded
-        resolve()
+        resolve(src)
         return
       }
 
       const img = new Image()
       img.onload = () => {
         this.images.set(src, img)
-        resolve()
+        resolve(src)
       }
       img.onerror = reject
       img.src = src
@@ -27,7 +27,7 @@ export class CanvasImageLoader {
   }
 
   // Load multiple images
-  loadMultipleImages(srcs: ImageSrc[]): Promise<void[]> {
+  loadMultipleImages(srcs: ImageSrc[]): Promise<ImageSrc[]> {
     return Promise.all(srcs.map(src => this.loadSingleImage(src)))
   }
 
