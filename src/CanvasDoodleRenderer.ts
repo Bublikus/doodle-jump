@@ -63,7 +63,9 @@ export class CanvasDoodleRenderer {
 
     if (!imagesLoaded) return
 
-    const getVanishingPlatformImage = (collisionsTime: number | null): CanvasImageSource | null => {
+    const getVanishingPlatformImage = (
+      collisionsTime: number | null,
+    ): { index: number; src: CanvasImageSource | null } => {
       const platformVanishingImages = [
         imagesMap.get(platformVanishing0Img)!,
         imagesMap.get(platformVanishing1Img)!,
@@ -72,18 +74,28 @@ export class CanvasDoodleRenderer {
       ]
 
       // change the image every 100ms after collisionsTime and return nothing if no more images
-      if (collisionsTime === null) return platformVanishingImages[0]
-      const index = Math.floor((Date.now() - collisionsTime) / 100)
-      return platformVanishingImages[index] || null
+      if (collisionsTime === null) {
+        return {
+          index: 0,
+          src: platformVanishingImages[0],
+        }
+      }
+
+      const imgIndex = Math.floor((Date.now() - collisionsTime) / 100)
+      const index = imgIndex >= platformVanishingImages.length ? -1 : imgIndex
+
+      return { index, src: platformVanishingImages[index] || null }
     }
 
     // Draw the platforms images
     platforms.forEach(platform => {
+      const vanishImage = getVanishingPlatformImage(platform.collisionsTime)
+
       const platformImage = (
         {
           [PlatformType.Normal]: imagesMap.get(platformNormalImg)!,
           [PlatformType.Moving]: imagesMap.get(platformMovingImg)!,
-          [PlatformType.Vanishing]: getVanishingPlatformImage(platform.collisionsTime),
+          [PlatformType.Vanishing]: vanishImage.src,
         } as Record<PlatformType, CanvasImageSource>
       )[platform.type]
 
@@ -91,10 +103,16 @@ export class CanvasDoodleRenderer {
 
       // @ts-ignore
       const platformAspectRatio = platformImage.width / platformImage.height
+      let y = platform.position.y
+
+      if (platform.type === PlatformType.Vanishing) {
+        y += vanishImage.index * 0.015
+      }
+
       this.ctx.drawImage(
         platformImage,
         this.getCanvasX(platform.position.x),
-        this.getCanvasY(platform.position.y),
+        this.getCanvasY(y),
         this.getCanvasX(platform.size.width),
         this.getCanvasY((platform.size.width / platformAspectRatio) * this.canvasRatio),
       )
