@@ -17,7 +17,9 @@ export class DoodleJump {
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
   private animationFrameRequest: number = 0
-  private platformsPerScreen: number = 10
+  private platformsPerScreen: number = 14
+  private normalPlatformFrequency: number = 1
+  private lastNonVanishingPlatformY: number = 0
   private velocity: number = 0
   private lastFrameTime: number = 0
   private deltaTime: number = 0
@@ -66,6 +68,8 @@ export class DoodleJump {
     this.score = 0
     this.acceleration = 0
     this.velocity = 0
+    this.lastNonVanishingPlatformY = 0
+    this.normalPlatformFrequency = 1
     this.platforms = []
 
     this.generateInitialPlatforms()
@@ -104,10 +108,7 @@ export class DoodleJump {
       let firstPlatformX = this.game.width / 2 - platformWidth / 2
 
       let x = Math.random() * xRange
-      let y = i / this.platformsPerScreen
-
-      // shift down
-      y += platformHeight / 2
+      let y = (this.game.height + this.platformHeight) * (i / this.platformsPerScreen) - this.platformHeight
 
       // Make sure the first platform is always in the middle
       if (i === this.platformsPerScreen - 1) {
@@ -119,6 +120,11 @@ export class DoodleJump {
         const range1 = (x / xRange) * (firstPlatformX - platformWidth)
         const range2 = range1 + (firstPlatformX + platformWidth)
         x = Math.random() > 0.5 ? range1 : range2
+      }
+
+      // Record the last non-vanishing platform's Y position for generating new platforms
+      if (i === 0) {
+        this.lastNonVanishingPlatformY = y
       }
 
       this.platforms.push({
@@ -156,6 +162,9 @@ export class DoodleJump {
     // Don't update game logic if the game is paused or over
     if (this.isPaused || this.isGameOver) return
 
+    // the closer score to 200 the less normal platforms frequency is
+    this.normalPlatformFrequency = Math.max(0, 1 - Math.min(1, this.score / 200))
+
     // Update game logic
     this.updatePlayer()
 
@@ -172,7 +181,6 @@ export class DoodleJump {
     }
 
     this.checkCollisions()
-
     this.render()
 
     if (this.isGameOver) {
@@ -228,6 +236,9 @@ export class DoodleJump {
       platform.position.y += movement
     })
 
+    // Update the last non-vanishing platform's Y position
+    this.lastNonVanishingPlatformY += movement
+
     // Check if platforms have moved off the bottom of the screen
     this.platforms = this.platforms.filter(platform => platform.position.y < this.game.height)
 
@@ -240,21 +251,40 @@ export class DoodleJump {
       const { width: platformWidth, height: platformHeight } = this.getPlatformSize()
 
       const x = Math.random() * (this.game.width - platformWidth)
-      const y = -platformHeight
+      const y = -this.platformHeight
+      const type = this.getNextPlatformType(y)
+      const xSpeed = type === PlatformType.Moving ? this.platformSpeed * randomSign : 0
 
-      // Randomly determine if the platform is moving
-      const types = [PlatformType.Normal, PlatformType.Moving, PlatformType.Vanishing]
-      const type = types[Math.floor(Math.random() * types.length)]
+      if (type !== PlatformType.Vanishing) {
+        this.lastNonVanishingPlatformY = y
+      }
 
       this.platforms.push({
         size: { width: platformWidth, height: platformHeight },
         position: { x, y },
         collisions: 0,
         collisionsTime: null,
-        speed: { x: this.platformSpeed * randomSign, y: 0 },
+        speed: { x: xSpeed, y: 0 },
         type,
       })
     }
+  }
+
+  private getNextPlatformType(currentY: number): PlatformType {
+    // Check the distance from the last non-vanishing platform
+    const distanceFromLast = Math.abs(currentY - this.lastNonVanishingPlatformY)
+
+    // Define a threshold distance for creating a non-vanishing platform
+    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight
+
+    if (distanceFromLast > safeDistance) {
+      return Math.random() < 1 ? PlatformType.Moving : PlatformType.Normal // Choose a stable platform if too far from the last one
+    }
+
+    // TODO: this.normalPlatformFrequency
+
+    // Otherwise, randomly determine the type with a chance for vanishing platforms
+    return Math.random() < 0 ? PlatformType.Moving : Math.random() < 1 ? PlatformType.Vanishing : PlatformType.Normal
   }
 
   private checkCollisions() {
