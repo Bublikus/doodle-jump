@@ -1,5 +1,5 @@
 import { InputHandler } from './handlers/InputHandler'
-import { Config, Platform, PlatformType, Player, RenderData, Renderer, Size } from './types'
+import { Config, Platform, PlatformType, Player, Renderer, Size } from './types'
 
 const isTouch = Boolean('ontouchstart' in window || navigator.maxTouchPoints)
 
