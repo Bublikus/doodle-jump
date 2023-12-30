@@ -14,6 +14,7 @@ export class DoodleJump {
   private accelerationMax: number = 7 * (isTouch ? 1.5 : 1)
   private platforms: Platform[] = []
   private platformSpeed: number = 0.1
+  private platformSpeedMax: number = 1
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
   private animationFrameRequest: number = 0
@@ -164,6 +165,10 @@ export class DoodleJump {
 
     // the closer score to 200 the less normal platforms frequency is
     this.normalPlatformFrequency = Math.max(0, 1 - Math.min(1, this.score / 200))
+    this.platformSpeed = Math.min(
+      Math.max(this.platformSpeed, this.platformSpeedMax * Math.min(1, this.score / 500)),
+      this.platformSpeedMax,
+    )
 
     // Update game logic
     this.updatePlayer()
@@ -278,13 +283,15 @@ export class DoodleJump {
     const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight / 2
 
     if (distanceFromLast > safeDistance) {
-      return Math.random() < 1 ? PlatformType.Moving : PlatformType.Normal // Choose a stable platform if too far from the last one
+      return Math.random() > 0.5 * this.normalPlatformFrequency ? PlatformType.Moving : PlatformType.Normal // Choose a stable platform if too far from the last one
     }
 
-    // TODO: this.normalPlatformFrequency
-
     // Otherwise, randomly determine the type with a chance for vanishing platforms
-    return Math.random() < 0 ? PlatformType.Moving : Math.random() < 1 ? PlatformType.Vanishing : PlatformType.Normal
+    return Math.random() < this.normalPlatformFrequency
+      ? PlatformType.Normal
+      : Math.random() < 0.5 * this.normalPlatformFrequency
+        ? PlatformType.Moving
+        : PlatformType.Vanishing
   }
 
   private checkCollisions() {
