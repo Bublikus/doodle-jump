@@ -27,6 +27,9 @@ export class DoodleJump {
   private inputHandler: InputHandler | undefined
   private renderer: Renderer = () => null
 
+  private SCORES_TO_ONLY_MOVING_PLATFORMS: number = 200
+  private SCORES_TO_MAX_SPEED: number = 500
+
   config: Required<Config>
   score: number = 0
   isPaused: boolean = false
@@ -163,10 +166,12 @@ export class DoodleJump {
     // Don't update game logic if the game is paused or over
     if (this.isPaused || this.isGameOver) return
 
-    // the closer score to 200 the less normal platforms frequency is
-    this.normalPlatformFrequency = Math.max(0, 1 - Math.min(1, this.score / 200))
+    // Change platform frequency based on score
+    this.normalPlatformFrequency = Math.max(0, 1 - Math.min(1, this.score / this.SCORES_TO_ONLY_MOVING_PLATFORMS))
+
+    // Change platform speed based on score
     this.platformSpeed = Math.min(
-      Math.max(this.platformSpeed, this.platformSpeedMax * Math.min(1, this.score / 500)),
+      Math.max(this.platformSpeed, this.platformSpeedMax * Math.min(1, this.score / this.SCORES_TO_MAX_SPEED)),
       this.platformSpeedMax,
     )
 
