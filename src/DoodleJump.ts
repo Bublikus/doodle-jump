@@ -217,6 +217,8 @@ export class DoodleJump {
   }
 
   private updatePlatforms() {
+    const randomSign = Math.random() > 0.5 ? 1 : -1
+
     // calculate the player distance from the half of the screen
     const distanceAboveHalf = Math.max(0, this.game.height / 2 - this.player.position.y)
 
@@ -249,7 +251,7 @@ export class DoodleJump {
         position: { x, y },
         collisions: 0,
         collisionsTime: null,
-        speed: { x: this.platformSpeed, y: 0 },
+        speed: { x: this.platformSpeed * randomSign, y: 0 },
         type,
       })
     }
