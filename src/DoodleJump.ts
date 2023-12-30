@@ -28,9 +28,9 @@ export class DoodleJump {
   private inputHandler: InputHandler | undefined
   private renderer: Renderer = () => null
 
-  private SCORES_TO_MIN_PLATFORM_SIZE: number = 200
-  private SCORES_TO_ONLY_MOVING_PLATFORMS: number = 400
-  private SCORES_TO_MAX_SPEED: number = 600
+  private SCORES_TO_MIN_PLATFORM_SIZE: number = 2
+  private SCORES_TO_ONLY_MOVING_PLATFORMS: number = 4
+  private SCORES_TO_MAX_SPEED: number = 6
 
   config: Required<Config>
   score: number = 0
