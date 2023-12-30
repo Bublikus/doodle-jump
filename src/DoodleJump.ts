@@ -17,6 +17,7 @@ export class DoodleJump {
   private platformSpeedMax: number = 1
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
+  private platformSizeTolerance: number = 1
   private animationFrameRequest: number = 0
   private platformsPerScreen: number = 15
   private normalPlatformFrequency: number = 1
@@ -27,8 +28,9 @@ export class DoodleJump {
   private inputHandler: InputHandler | undefined
   private renderer: Renderer = () => null
 
-  private SCORES_TO_ONLY_MOVING_PLATFORMS: number = 200
-  private SCORES_TO_MAX_SPEED: number = 500
+  private SCORES_TO_MIN_PLATFORM_SIZE: number = 200
+  private SCORES_TO_ONLY_MOVING_PLATFORMS: number = 400
+  private SCORES_TO_MAX_SPEED: number = 600
 
   config: Required<Config>
   score: number = 0
@@ -74,6 +76,7 @@ export class DoodleJump {
     this.velocity = 0
     this.lastNonVanishingPlatformY = 0
     this.normalPlatformFrequency = 1
+    this.platformSizeTolerance = 1
     this.platforms = []
 
     this.generateInitialPlatforms()
@@ -174,6 +177,9 @@ export class DoodleJump {
       Math.max(this.platformSpeed, this.platformSpeedMax * Math.min(1, this.score / this.SCORES_TO_MAX_SPEED)),
       this.platformSpeedMax,
     )
+
+    // Change platform size tolerance based on score
+    this.platformSizeTolerance = Math.max(0, 1 - Math.min(1, this.score / this.SCORES_TO_MIN_PLATFORM_SIZE))
 
     // Update game logic
     this.updatePlayer()
@@ -325,8 +331,14 @@ export class DoodleJump {
   }
 
   private getPlatformSize(): Size {
-    const platformWidth = this.platformWidth - Math.random() * (this.platformWidth / 5)
-    const platformHeight = this.platformHeight - Math.random() * (this.platformHeight / 5)
+    const widthDiff = this.platformWidth / 5
+    const heightDiff = this.platformHeight / 5
+
+    const minWidth = this.platformWidth - widthDiff
+    const minHeight = this.platformHeight - heightDiff
+
+    const platformWidth = minWidth + Math.random() * widthDiff * this.platformSizeTolerance
+    const platformHeight = minHeight + Math.random() * heightDiff * this.platformSizeTolerance
 
     return { width: platformWidth, height: platformHeight }
   }
