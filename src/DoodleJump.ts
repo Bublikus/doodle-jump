@@ -18,7 +18,7 @@ export class DoodleJump {
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
   private animationFrameRequest: number = 0
-  private platformsPerScreen: number = 14
+  private platformsPerScreen: number = 15
   private normalPlatformFrequency: number = 1
   private lastNonVanishingPlatformY: number = 0
   private velocity: number = 0
@@ -230,6 +230,7 @@ export class DoodleJump {
 
     if (platform.position.x < 0 || platform.position.x > this.game.width - platform.size.width) {
       // Reverse direction when hitting the boundaries
+      platform.position.x = Math.max(0, Math.min(this.game.width - platform.size.width, platform.position.x))
       platform.speed.x *= -1
     }
   }
@@ -285,7 +286,7 @@ export class DoodleJump {
     const distanceFromLast = Math.abs(currentY - this.lastNonVanishingPlatformY)
 
     // Define a threshold distance for creating a non-vanishing platform
-    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight / 2
+    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight / 1.5 // 1.5 is a tolerance
 
     if (distanceFromLast > safeDistance) {
       return Math.random() > 0.5 * this.normalPlatformFrequency ? PlatformType.Moving : PlatformType.Normal // Choose a stable platform if too far from the last one
