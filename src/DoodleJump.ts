@@ -10,15 +10,22 @@ type Config = {
 };
 
 type Coords = { x: number; y: number };
+type Speed = { x: number; y: number };
 type Size = { width: number; height: number };
 type Player = {
   position: Coords;
   size: Size;
 };
+enum PlatformType {
+  Normal = "normal",
+  Moving = "moving",
+  Vanishing = "vanishing",
+}
 type Platform = {
   size: Size;
   position: Coords;
-  type: "normal" | "moving" | "vanishing";
+  speed: Speed;
+  type: PlatformType;
 };
 type Renderer = (data: RenderData) => void;
 
@@ -32,6 +39,7 @@ export class DoodleJump {
   private accelerationFactor: number = 0.8 * (isTouch ? 1.5 : 1);
   private accelerationMax: number = 7 * (isTouch ? 1.5 : 1);
   private platforms: Platform[] = [];
+  private platformSpeed: number = 0.1;
   private platformHeight: number = 0.1;
   private platformWidth: number = 0.2;
   private animationFrameRequest: number = 0;
@@ -152,7 +160,8 @@ export class DoodleJump {
           height: platformHeight,
         },
         position: { x, y },
-        type: "normal",
+        speed: { x: 0, y: 0 },
+        type: PlatformType.Normal,
       });
     }
   }
@@ -180,6 +189,13 @@ export class DoodleJump {
 
     // Update game logic
     this.updatePlayer();
+
+    // Update moving platforms
+    this.platforms.forEach((platform) => {
+      if (platform.type === PlatformType.Moving) {
+        this.updateMovingPlatform(platform);
+      }
+    });
 
     // Update platforms if the player is near the top of the screen
     if (this.player.position.y < this.game.height / 2 && this.velocity < 0) {
@@ -228,6 +244,19 @@ export class DoodleJump {
     }
   }
 
+  private updateMovingPlatform(platform: Platform) {
+    // Update the platform's X position within the range
+    platform.position.x += platform.speed.x * this.deltaTime;
+
+    if (
+      platform.position.x < 0 ||
+      platform.position.x > this.game.width - platform.size.width
+    ) {
+      // Reverse direction when hitting the boundaries
+      platform.speed.x *= -1;
+    }
+  }
+
   private updatePlatforms() {
     // calculate the player distance from the half of the screen
     const distanceAboveHalf = Math.max(
@@ -261,10 +290,15 @@ export class DoodleJump {
       const x = Math.random() * (this.game.width - platformWidth);
       const y = -platformHeight;
 
+      // Randomly determine if the platform is moving
+      const type =
+        Math.random() < 0.4 ? PlatformType.Moving : PlatformType.Normal; // 20% chance of being a moving platform
+
       this.platforms.push({
         size: { width: platformWidth, height: platformHeight },
         position: { x, y },
-        type: "normal",
+        speed: { x: this.platformSpeed, y: 0 },
+        type,
       });
     }
   }
