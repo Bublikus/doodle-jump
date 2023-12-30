@@ -26,7 +26,7 @@ export class DoodleJump {
   private game = { width: 1, height: 1 };
   private player: Player = {
     position: { x: 0, y: 0 },
-    size: { width: 0.12, height: 0.12 },
+    size: { width: 0.14, height: 0.14 },
   };
   private acceleration: number = 0;
   private accelerationFactor: number = 0.8 * (isTouch ? 1.5 : 1);
