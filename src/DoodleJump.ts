@@ -116,7 +116,7 @@ export class DoodleJump {
       }
 
       // Make sure the second to 4th platforms are always X away from the first 4 platforms
-      if (this.platformsPerScreen - i > 1 && this.platformsPerScreen - i < 5) {
+      if (this.platformsPerScreen - i > 1 && this.platformsPerScreen - i < 6) {
         const range1 = (x / xRange) * (firstPlatformX - platformWidth)
         const range2 = range1 + (firstPlatformX + platformWidth)
         x = Math.random() > 0.5 ? range1 : range2
@@ -275,7 +275,7 @@ export class DoodleJump {
     const distanceFromLast = Math.abs(currentY - this.lastNonVanishingPlatformY)
 
     // Define a threshold distance for creating a non-vanishing platform
-    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight
+    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight / 2
 
     if (distanceFromLast > safeDistance) {
       return Math.random() < 1 ? PlatformType.Moving : PlatformType.Normal // Choose a stable platform if too far from the last one
