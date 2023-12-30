@@ -1,14 +1,17 @@
 import { RenderData } from './types'
 import { CanvasImageLoader } from './CanvasImageLoader'
-import platformImg from './assets/platform.png'
+import platformNormalImg from './assets/normal-platform.png'
+import platformMovingImg from './assets/moving-platform.png'
 import doodleRightImg from './assets/doodle-right.png'
+import { PlatformType } from './DoodleJump'
 
 const imageLoader = new CanvasImageLoader()
 
 const imagesMap = new Map<string, CanvasImageSource>()
 
-imageLoader.loadMultipleImages([platformImg, doodleRightImg]).then(() => {
-  imagesMap.set(platformImg, imageLoader.getImage(platformImg)!)
+imageLoader.loadMultipleImages([platformNormalImg, platformMovingImg, doodleRightImg]).then(() => {
+  imagesMap.set(platformNormalImg, imageLoader.getImage(platformNormalImg)!)
+  imagesMap.set(platformMovingImg, imageLoader.getImage(platformMovingImg)!)
   imagesMap.set(doodleRightImg, imageLoader.getImage(doodleRightImg)!)
 })
 
@@ -46,13 +49,19 @@ export class CanvasDoodleRenderer {
     // Clear the canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-    if (!imagesMap.has(doodleRightImg) || !imagesMap.has(platformImg)) {
+    if (!imagesMap.has(doodleRightImg) || !imagesMap.has(platformNormalImg) || !imagesMap.has(platformMovingImg)) {
       return
     }
 
     // Draw the platforms images
     platforms.forEach(platform => {
-      const platformImage = imagesMap.get(platformImg)!
+      const platformImage = (
+        {
+          [PlatformType.Normal]: imagesMap.get(platformNormalImg)!,
+          [PlatformType.Moving]: imagesMap.get(platformMovingImg)!,
+        } as Record<PlatformType, CanvasImageSource>
+      )[platform.type]
+
       // @ts-ignore
       const platformAspectRatio = platformImage.width / platformImage.height
       this.ctx.drawImage(

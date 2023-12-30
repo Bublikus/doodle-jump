@@ -16,7 +16,7 @@ type Player = {
   position: Coords
   size: Size
 }
-enum PlatformType {
+export enum PlatformType {
   Normal = 'normal',
   Moving = 'moving',
   Vanishing = 'vanishing',
