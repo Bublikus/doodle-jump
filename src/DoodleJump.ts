@@ -132,7 +132,7 @@ export class DoodleJump {
       let y = i / this.platformsPerScreen;
 
       // shift down
-      y += this.platformHeight;
+      y += platformHeight / 2;
 
       // Make sure the first platform is always in the middle
       if (i === this.platformsPerScreen - 1) {
@@ -278,7 +278,7 @@ export class DoodleJump {
 
       const isYCollision =
         this.player.position.y + this.player.size.height >=
-          platform.position.y &&
+          platform.position.y + platform.size.height / 2 && // small tolerance
         this.player.position.y + this.player.size.height <=
           platform.position.y + platform.size.height;
 
