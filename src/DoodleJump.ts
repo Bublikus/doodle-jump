@@ -292,7 +292,7 @@ export class DoodleJump {
     const distanceFromLast = Math.abs(currentY - this.lastNonVanishingPlatformY)
 
     // Define a threshold distance for creating a non-vanishing platform
-    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight
+    const safeDistance = this.config.jumpHeight ** 2 / (2 * this.config.gravity) - this.platformHeight / 1.5 // 1.5 is a tolerance
 
     if (distanceFromLast > safeDistance) {
       return Math.random() > 0.5 * this.normalPlatformFrequency ? PlatformType.Moving : PlatformType.Normal // Choose a stable platform if too far from the last one
