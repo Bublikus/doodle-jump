@@ -14,7 +14,7 @@ export class DoodleJump {
   private accelerationMax: number = 7 * (isTouch ? 1.5 : 1)
   private platforms: Platform[] = []
   private platformSpeed: number = 0.1
-  private platformSpeedMax: number = 1
+  private platformSpeedMax: number = 1.2
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
   private platformSizeTolerance: number = 1
@@ -114,16 +114,20 @@ export class DoodleJump {
       const xRange = this.game.width - platformWidth
       let firstPlatformX = this.game.width / 2 - platformWidth / 2
 
+      // Calculate each part of the equation and store them in variables
+      const totalHeight = this.game.height + this.platformHeight
+      const inverseIndexRatio = (this.platformsPerScreen - i - 1) / this.platformsPerScreen
+
       let x = Math.random() * xRange
-      let y = (this.game.height + this.platformHeight) * (i / this.platformsPerScreen) - this.platformHeight
+      let y = totalHeight * inverseIndexRatio - this.platformHeight
 
       // Make sure the first platform is always in the middle
-      if (i === this.platformsPerScreen - 1) {
+      if (i === 0) {
         x = firstPlatformX
       }
 
       // Make sure the second to 4th platforms are always X away from the first 4 platforms
-      if (this.platformsPerScreen - i > 1 && this.platformsPerScreen - i < 6) {
+      if (i > 0 && i < 5) {
         const range1 = (x / xRange) * (firstPlatformX - platformWidth)
         const range2 = range1 + (firstPlatformX + platformWidth)
         x = Math.random() > 0.5 ? range1 : range2
@@ -149,7 +153,7 @@ export class DoodleJump {
   }
 
   private generateInitialPlayer() {
-    const lastPlatform = this.platforms[this.platforms.length - 1]
+    const lastPlatform = this.platforms[0]
     const lastPlatformWidth = lastPlatform.size.width
     const lastPlatformCenterX = lastPlatform.position.x + lastPlatformWidth / 2
 
@@ -242,8 +246,6 @@ export class DoodleJump {
   }
 
   private updatePlatforms() {
-    const randomSign = Math.random() > 0.5 ? 1 : -1
-
     // calculate the player distance from the half of the screen
     const distanceAboveHalf = Math.max(0, this.game.height / 2 - this.player.position.y)
 
@@ -257,34 +259,44 @@ export class DoodleJump {
     this.lastNonVanishingPlatformY += movement
 
     // Check if platforms have moved off the bottom of the screen
-    this.platforms = this.platforms.filter(platform => platform.position.y < this.game.height)
+    const filteredPlatforms = this.platforms.filter(platform => platform.position.y < this.game.height)
 
     // Update score
-    const filteredPlatformsAmount = this.platformsPerScreen - this.platforms.length
+    const filteredPlatformsAmount = this.platforms.length - filteredPlatforms.length
+    this.platforms = filteredPlatforms
     this.score += filteredPlatformsAmount
 
-    // Add new platforms at the top as needed
-    while (this.platforms.length < this.platformsPerScreen) {
-      const { width: platformWidth, height: platformHeight } = this.getPlatformSize()
+    // Calculate the distance from the last platform to the top of the screen
+    const distanceToTop = this.platforms[this.platforms.length - 1].position.y + this.platformHeight
 
-      const x = Math.random() * (this.game.width - platformWidth)
-      const y = -this.platformHeight
-      const type = this.getNextPlatformType(y)
-      const xSpeed = type === PlatformType.Moving ? this.platformSpeed * randomSign : 0
-
-      if (type !== PlatformType.Vanishing) {
-        this.lastNonVanishingPlatformY = y
-      }
-
-      this.platforms.push({
-        size: { width: platformWidth, height: platformHeight },
-        position: { x, y },
-        collisions: 0,
-        collisionsTime: null,
-        speed: { x: xSpeed, y: 0 },
-        type,
-      })
+    // Add a new platform when the distance to the last one is enough
+    if (distanceToTop >= (this.game.height + this.platformHeight) / this.platformsPerScreen) {
+      this.addNewPlatform()
     }
+  }
+
+  private addNewPlatform() {
+    const randomSign = Math.random() > 0.5 ? 1 : -1
+
+    const { width: platformWidth, height: platformHeight } = this.getPlatformSize()
+
+    const x = Math.random() * (this.game.width - platformWidth)
+    const y = -this.platformHeight
+    const type = this.getNextPlatformType(y)
+    const xSpeed = type === PlatformType.Moving ? this.platformSpeed * randomSign : 0
+
+    if (type !== PlatformType.Vanishing) {
+      this.lastNonVanishingPlatformY = y
+    }
+
+    this.platforms.push({
+      size: { width: platformWidth, height: platformHeight },
+      position: { x, y },
+      collisions: 0,
+      collisionsTime: null,
+      speed: { x: xSpeed, y: 0 },
+      type,
+    })
   }
 
   private getNextPlatformType(currentY: number): PlatformType {
