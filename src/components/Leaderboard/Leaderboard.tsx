@@ -1,52 +1,55 @@
-import React, { useEffect, useRef } from "react";
-import { Leader } from "../../firebase";
-import "./styles.css";
+import React, { useEffect, useRef } from 'react'
+import { Leader } from '../../firebase'
+import './styles.css'
 
 interface LeaderboardProps {
-  open: boolean;
-  active: boolean;
-  player: Leader;
-  leaders: Leader[];
-  onClose(): void;
+  open: boolean
+  active: boolean
+  player: Leader
+  leaders: Leader[]
+  onClose(): void
 }
 
-export const Leaderboard: React.FC<LeaderboardProps> = ({
-  open,
-  active,
-  player,
-  leaders,
-  onClose,
-}) => {
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+const emptyPlayer: Omit<Leader, 'id'> = {
+  player: '',
+  score: '' as unknown as number,
+  date: '',
+}
 
-  const sortedLeaders = leaders.sort((a, b) => b.score - a.score).slice(0, 10);
+export const Leaderboard: React.FC<LeaderboardProps> = ({ open, active, player, leaders, onClose }) => {
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
+  const sortedLeaders = [...leaders].slice(0, 10)
+  const paddedLeaders = [...Array(10 - sortedLeaders.length).fill(emptyPlayer)]
+    .concat(sortedLeaders)
+    .sort((a, b) => (!b.score ? -1 : b.score - a.score))
 
   const getPrize = (i: number) => {
     if (i === 0) {
-      return "🥇";
+      return '🥇'
     } else if (i === 1) {
-      return "🥈";
+      return '🥈'
     } else if (i === 2) {
-      return "🥉";
+      return '🥉'
     } else {
-      return "";
+      return ''
     }
-  };
+  }
 
   useEffect(() => {
     const handleEscClose = (e: KeyboardEvent) => {
-      if (["Escape", "Enter", "Space"].includes(e.code)) onCloseRef.current();
-    };
+      if (['Escape', 'Enter', 'Space'].includes(e.code)) onCloseRef.current()
+    }
 
     if (open && active) {
-      window.addEventListener("keydown", handleEscClose);
+      window.addEventListener('keydown', handleEscClose)
     }
 
     return () => {
-      window.removeEventListener("keydown", handleEscClose);
-    };
-  }, [open, active]);
+      window.removeEventListener('keydown', handleEscClose)
+    }
+  }, [open, active])
 
   return !open ? null : (
     <div role="button" className="leaderboard" onClick={onClose}>
@@ -61,19 +64,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             </tr>
           </thead>
           <tbody>
-            {sortedLeaders.map((leader, i) => (
-              <tr
-                key={leader.id}
-                className={leader.id === player.id ? "strong" : ""}
-              >
+            {paddedLeaders.map((leader, i) => (
+              <tr key={leader.id || i} className={leader.id === player.id ? 'strong' : ''}>
                 <td>
-                  <span>{leader.id === player.id ? "→ " : ""}</span>
+                  <span>{leader.id === player.id ? '→ ' : ''}</span>
                   <span>{i + 1}</span>
-                  <span>
-                    {getPrize(i) || <span className="invisible">🥉</span>}
-                  </span>
+                  <span>{getPrize(i) || <span className="invisible">🥉</span>}</span>
                 </td>
-                <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
+                <td>{leader.player.slice(0, 20).padEnd(20, '.')}</td>
                 <td>{leader.score}</td>
               </tr>
             ))}
@@ -81,5 +79,5 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         </table>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -349,10 +349,10 @@ export class DoodleJump {
     const minWidth = this.platformWidth - widthDiff
     const minHeight = this.platformHeight - heightDiff
 
-    const platformWidth = minWidth + Math.random() * widthDiff * this.platformSizeTolerance
-    const platformHeight = minHeight + Math.random() * heightDiff * this.platformSizeTolerance
+    const width = minWidth + Math.random() * widthDiff * this.platformSizeTolerance
+    const height = minHeight + Math.random() * heightDiff * this.platformSizeTolerance
 
-    return { width: platformWidth, height: platformHeight }
+    return { width, height }
   }
 
   private render() {
