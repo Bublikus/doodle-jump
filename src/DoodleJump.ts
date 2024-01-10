@@ -14,7 +14,7 @@ export class DoodleJump {
   private accelerationFactor: number = 0.8
   private accelerationMax: number = 7
   private platforms: Platform[] = []
-  private platformSpeed: number = 2
+  private platformSpeed: number = 0.1
   private platformSpeedMax: number = 1.2 * (isTouch ? 1.5 : 1)
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
