@@ -11,11 +11,11 @@ export class DoodleJump {
     size: { width: 0.14, height: 0.14 },
   }
   private acceleration: number = 0
-  private accelerationFactor: number = 0.8 * (isTouch ? 1.5 : 1)
-  private accelerationMax: number = 7 * (isTouch ? 1.5 : 1)
+  private accelerationFactor: number = 0.8
+  private accelerationMax: number = 7
   private platforms: Platform[] = []
-  private platformSpeed: number = 0.1
-  private platformSpeedMax: number = 1.2
+  private platformSpeed: number = 2
+  private platformSpeedMax: number = 1.2 * (isTouch ? 1.5 : 1)
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
   private platformSizeTolerance: number = 1
@@ -79,6 +79,7 @@ export class DoodleJump {
     this.lastNonVanishingPlatformY = 0
     this.normalPlatformFrequency = 1
     this.platformSizeTolerance = 1
+    this.initialTouchX = null
     this.platforms = []
 
     this.generateInitialPlatforms()
@@ -112,8 +113,8 @@ export class DoodleJump {
     const touchX = touch.clientX
     const delta = touchX - this.initialTouchX
     const shift = this.game.width * (delta / GAME_WIDTH)
-    this.initialTouchX = touchX
     this.player.position.x += shift
+    this.initialTouchX = touchX
   }
 
   private handleEndPlayerMove() {
