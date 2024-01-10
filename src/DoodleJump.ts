@@ -1,6 +1,7 @@
 import { InputHandler } from './handlers/InputHandler'
 import { Config, Platform, PlatformType, Player, Renderer, Size } from './types'
 
+const GAME_WIDTH = 300 // px
 const isTouch = Boolean('ontouchstart' in window || navigator.maxTouchPoints)
 
 export class DoodleJump {
@@ -110,7 +111,7 @@ export class DoodleJump {
     const touch = e.touches[0]
     const touchX = touch.clientX
     const delta = touchX - this.initialTouchX
-    const shift = this.game.width * (delta / window.innerWidth)
+    const shift = this.game.width * (delta / GAME_WIDTH)
     this.initialTouchX = touchX
     this.player.position.x += shift
   }
