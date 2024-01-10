@@ -88,17 +88,26 @@ export class DoodleJump {
   private bindKeys() {
     this.inputHandler?.destroy()
     this.inputHandler = new InputHandler({
-      swipeTickThresholdPX: 1,
+      swipeTickThresholdPX: 5,
       fireKeyHoldPerFrame: true,
     })
     this.inputHandler.handleActions({
       ArrowLeft: () => this.movePlayerLeft(),
       ArrowRight: () => this.movePlayerRight(),
       touchstart: e => this.handleStartPlayerMove(e),
+      swipeLeft: e => this.setPlayerDirection(e),
+      swipeRight: e => this.setPlayerDirection(e),
       touchmove: e => this.handleMovePlayer(e),
       touchend: () => this.handleEndPlayerMove(),
       touchcancel: () => this.handleEndPlayerMove(),
     })
+  }
+
+  private setPlayerDirection(e: TouchEvent) {
+    const touch = e.touches[0]
+    const touchX = touch.clientX
+    this.initialTouchX = touchX
+    this.touchMoveXDistance = 0
   }
 
   private handleStartPlayerMove(e: TouchEvent) {
