@@ -1,9 +1,6 @@
 import { InputHandler } from './handlers/InputHandler'
 import { Config, Platform, PlatformType, Player, Renderer, Size } from './types'
 
-const GAME_WIDTH = 300 // px
-const isTouch = Boolean('ontouchstart' in window || navigator.maxTouchPoints)
-
 export class DoodleJump {
   private game = { width: 1, height: 1 }
   private player: Player = {
@@ -15,7 +12,7 @@ export class DoodleJump {
   private accelerationMax: number = 7
   private platforms: Platform[] = []
   private platformSpeed: number = 0.1
-  private platformSpeedMax: number = 1.2 * (isTouch ? 1.5 : 1)
+  private platformSpeedMax: number = 1.5
   private platformHeight: number = 0.1
   private platformWidth: number = 0.2
   private platformSizeTolerance: number = 1
@@ -28,6 +25,7 @@ export class DoodleJump {
   private deltaTime: number = 0
   private inputHandler: InputHandler | undefined
   private initialTouchX: number | null = null
+  private touchMoveXDistance: number = 0
   private renderer: Renderer = () => null
 
   private SCORES_TO_MIN_PLATFORM_SIZE: number = 200
@@ -79,6 +77,7 @@ export class DoodleJump {
     this.lastNonVanishingPlatformY = 0
     this.normalPlatformFrequency = 1
     this.platformSizeTolerance = 1
+    this.touchMoveXDistance = 0
     this.initialTouchX = null
     this.platforms = []
 
@@ -98,6 +97,7 @@ export class DoodleJump {
       touchstart: e => this.handleStartPlayerMove(e),
       touchmove: e => this.handleMovePlayer(e),
       touchend: () => this.handleEndPlayerMove(),
+      touchcancel: () => this.handleEndPlayerMove(),
     })
   }
 
@@ -105,20 +105,19 @@ export class DoodleJump {
     const touch = e.touches[0]
     const touchX = touch.clientX
     this.initialTouchX = touchX
+    this.touchMoveXDistance = 0
   }
 
   private handleMovePlayer(e: TouchEvent) {
     if (this.initialTouchX === null) return
     const touch = e.touches[0]
     const touchX = touch.clientX
-    const delta = touchX - this.initialTouchX
-    const shift = this.game.width * (delta / GAME_WIDTH)
-    this.player.position.x += shift
-    this.initialTouchX = touchX
+    this.touchMoveXDistance = touchX - this.initialTouchX
   }
 
   private handleEndPlayerMove() {
     this.initialTouchX = null
+    this.touchMoveXDistance = 0
   }
 
   private movePlayerLeft() {
@@ -233,6 +232,15 @@ export class DoodleJump {
   }
 
   private updatePlayer() {
+    // Move the player left or right based on touch move distance
+    if (this.touchMoveXDistance) {
+      if (this.touchMoveXDistance > 0) {
+        this.movePlayerRight()
+      } else {
+        this.movePlayerLeft()
+      }
+    }
+
     // calculate the player distance from the half of the screen
     const distanceAboveHalf = Math.max(0, this.game.height / 2 - this.player.position.y)
 

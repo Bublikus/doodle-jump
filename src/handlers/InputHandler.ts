@@ -43,6 +43,7 @@ type TouchActionKeys =
   | 'touchstart'
   | 'touchmove'
   | 'touchend'
+  | 'touchcancel'
 
 export type TouchGestureHandlerActions = Partial<Record<TouchActionKeys, (e: TouchEvent) => void>>
 
@@ -81,6 +82,7 @@ export class TouchGestureHandler {
     this.handleTouchStart = this.handleTouchStart.bind(this)
     this.handleTouchMove = this.handleTouchMove.bind(this)
     this.handleTouchEnd = this.handleTouchEnd.bind(this)
+    this.handleTouchCancel = this.handleTouchCancel.bind(this)
   }
 
   public handleActions(actions: TouchGestureHandlerActions) {
@@ -91,6 +93,8 @@ export class TouchGestureHandler {
     this.element.addEventListener('touchmove', this.handleTouchMove, false)
     // @ts-ignore
     this.element.addEventListener('touchend', this.handleTouchEnd, false)
+    // @ts-ignore
+    this.element.addEventListener('touchcancel', this.handleTouchCancel, false)
   }
 
   private handleTouchStart(event: TouchEvent) {
@@ -125,6 +129,19 @@ export class TouchGestureHandler {
 
       this.actions[swipeDirection]?.(event)
     }
+  }
+
+  private handleTouchCancel(event: TouchEvent) {
+    this.actions['touchcancel']?.(event)
+
+    clearTimeout(this.singleClickTimeout)
+
+    this.touchStartX = 0
+    this.touchStartY = 0
+    this.swipeStartX = 0
+    this.swipeStartY = 0
+    this.touchStartTime = 0
+    this.isSwiping = false
   }
 
   private handleTouchEnd(event: TouchEvent) {
@@ -183,6 +200,8 @@ export class TouchGestureHandler {
     this.element.removeEventListener('touchmove', this.handleTouchMove, false)
     // @ts-ignore
     this.element.removeEventListener('touchend', this.handleTouchEnd, false)
+    // @ts-ignore
+    this.element.removeEventListener('touchcancel', this.handleTouchCancel, false)
   }
 }
 
