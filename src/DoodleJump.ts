@@ -26,6 +26,7 @@ export class DoodleJump {
   private lastFrameTime: number = 0
   private deltaTime: number = 0
   private inputHandler: InputHandler | undefined
+  private initialTouchX: number | null = null
   private renderer: Renderer = () => null
 
   private SCORES_TO_MIN_PLATFORM_SIZE: number = 200
@@ -92,9 +93,30 @@ export class DoodleJump {
     this.inputHandler.handleActions({
       ArrowLeft: () => this.movePlayerLeft(),
       ArrowRight: () => this.movePlayerRight(),
-      swipeLeft: () => this.movePlayerLeft(),
-      swipeRight: () => this.movePlayerRight(),
+      touchstart: e => this.handleStartPlayerMove(e),
+      touchmove: e => this.handleMovePlayer(e),
+      touchend: () => this.handleEndPlayerMove(),
     })
+  }
+
+  private handleStartPlayerMove(e: TouchEvent) {
+    const touch = e.touches[0]
+    const touchX = touch.clientX
+    this.initialTouchX = touchX
+  }
+
+  private handleMovePlayer(e: TouchEvent) {
+    if (this.initialTouchX === null) return
+    const touch = e.touches[0]
+    const touchX = touch.clientX
+    const delta = touchX - this.initialTouchX
+    const shift = this.game.width * (delta / window.innerWidth)
+    this.initialTouchX = touchX
+    this.player.position.x += shift
+  }
+
+  private handleEndPlayerMove() {
+    this.initialTouchX = null
   }
 
   private movePlayerLeft() {
