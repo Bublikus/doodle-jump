@@ -118,7 +118,7 @@ export const App: FC = () => {
 
       <header>
         <h1 className={`${score > 0 ? "invisible-slide" : ""}`}>
-          Double Jump Game
+          Doodle Jump Game
         </h1>
         <h3>Score: {score}</h3>
       </header>
