@@ -1,6 +1,6 @@
 {
-    "name": "doodle-jump",
-    "short_name": "doodle-jump",
+    "name": "Doodle Jump",
+    "short_name": "Doodle Jump",
     "icons": [
         {
             "src": "/android-chrome-72x72.png",
@@ -8,7 +8,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
+    "theme_color": "#0090FF",
     "background_color": "#ffffff",
     "display": "fullscreen"
 }
